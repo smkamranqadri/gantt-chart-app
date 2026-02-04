@@ -2,6 +2,10 @@
 
 React + TypeScript + Vite + TailwindCSS proof of concept for a 7‑day Gantt chart with drag/resize interactions and task creation.
 
+## Demo
+
+![Gantt demo](docs/demo.gif)
+
 ## Run locally
 
 ```bash

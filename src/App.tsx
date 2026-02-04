@@ -28,7 +28,11 @@ function App() {
   const [dragState, setDragState] = useState<DragState | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [weekStartDate, setWeekStartDate] = useState(parseDate(weekStart))
+  const [canUndo, setCanUndo] = useState(false)
+  const [canRedo, setCanRedo] = useState(false)
   const addTaskButtonRef = useRef<HTMLButtonElement>(null)
+  const historyRef = useRef<Task[][]>([])
+  const redoRef = useRef<Task[][]>([])
 
   const weekStartValue = formatDate(weekStartDate)
   const weekDays = Array.from({ length: 7 }, (_, index) =>
@@ -52,6 +56,65 @@ function App() {
       ]),
     )
   }, [tasks, weekStartValue])
+
+  useEffect(() => {
+    const handleUndo = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
+        event.preventDefault()
+        const previous = historyRef.current.pop()
+        if (previous) {
+          redoRef.current.push(tasks.map((task) => ({ ...task })))
+          setTasks(previous)
+          setCanUndo(historyRef.current.length > 0)
+          setCanRedo(redoRef.current.length > 0)
+        }
+      }
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        (event.key.toLowerCase() === 'y' ||
+          (event.shiftKey && event.key.toLowerCase() === 'z'))
+      ) {
+        event.preventDefault()
+        const next = redoRef.current.pop()
+        if (next) {
+          historyRef.current.push(tasks.map((task) => ({ ...task })))
+          setTasks(next)
+          setCanUndo(historyRef.current.length > 0)
+          setCanRedo(redoRef.current.length > 0)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleUndo)
+    return () => window.removeEventListener('keydown', handleUndo)
+  }, [tasks])
+
+  const pushHistory = (snapshot: Task[]) => {
+    historyRef.current.push(snapshot.map((task) => ({ ...task })))
+    redoRef.current = []
+    setCanUndo(true)
+    setCanRedo(false)
+  }
+
+  const handleUndoClick = () => {
+    const previous = historyRef.current.pop()
+    if (previous) {
+      redoRef.current.push(tasks.map((task) => ({ ...task })))
+      setTasks(previous)
+      setCanUndo(historyRef.current.length > 0)
+      setCanRedo(redoRef.current.length > 0)
+    }
+  }
+
+  const handleRedoClick = () => {
+    const next = redoRef.current.pop()
+    if (next) {
+      historyRef.current.push(tasks.map((task) => ({ ...task })))
+      setTasks(next)
+      setCanUndo(historyRef.current.length > 0)
+      setCanRedo(redoRef.current.length > 0)
+    }
+  }
 
   const getLaneIdFromPoint = (x: number, y: number) => {
     const element = document.elementFromPoint(x, y)
@@ -170,6 +233,26 @@ function App() {
                 Next
               </button>
             </div>
+            <div className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-1 shadow-sm">
+              <button
+                type="button"
+                className="rounded-full px-3 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 disabled:cursor-not-allowed disabled:text-slate-300"
+                onClick={handleUndoClick}
+                disabled={!canUndo}
+                title="Undo (Ctrl+Z / Cmd+Z)"
+              >
+                Undo
+              </button>
+              <button
+                type="button"
+                className="rounded-full px-3 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 disabled:cursor-not-allowed disabled:text-slate-300"
+                onClick={handleRedoClick}
+                disabled={!canRedo}
+                title="Redo (Ctrl+Y / Cmd+Shift+Z)"
+              >
+                Redo
+              </button>
+            </div>
             <button
               type="button"
               className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
@@ -205,6 +288,7 @@ function App() {
                     onDragStart={(task, clientX) => {
                       const current = taskIndexMap.get(task.id)
                       if (!current) return
+                      pushHistory(tasks)
                       setDragState({
                         taskId: task.id,
                         mode: 'move',
@@ -217,6 +301,7 @@ function App() {
                     onResizeStart={(task, clientX) => {
                       const current = taskIndexMap.get(task.id)
                       if (!current) return
+                      pushHistory(tasks)
                       setDragState({
                         taskId: task.id,
                         mode: 'resize',
@@ -239,6 +324,7 @@ function App() {
         weekStart={weekStartDate}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(task) => {
+          pushHistory(tasks)
           setTasks((prev) => [...prev, task])
           setIsModalOpen(false)
         }}

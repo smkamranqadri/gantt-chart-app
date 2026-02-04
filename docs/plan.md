@@ -83,11 +83,11 @@ Test/Commit: create a task that spans before/after the week and verify rendering
 
 ## Phase 9 — Productivity + Demo Assets
 
-1. Add Undo (Ctrl+Z) for the last change (drag, resize, add task).
-2. Add a “Seed demo plan” button (first-time users) with multiple sample scenarios.
+1. Add Undo/Redo (Ctrl+Z / Ctrl+Y) for the last change (drag, resize, add task).
+2. Add undo/redo buttons in the header for mouse users.
 3. Add a short demo GIF in `README.md`.
 
-Test/Commit: verify undo, demo seeding behavior, and README GIF display.
+Test/Commit: verify undo/redo behavior and README GIF display.
 
 ## Phase 10 — Deploy Setup
 
