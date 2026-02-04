@@ -77,7 +77,7 @@ function GanttLane({
           return (
             <div
               key={task.id}
-              className={`group absolute top-3 h-11 cursor-grab rounded-xl px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-black/5 active:cursor-grabbing ${laneColors[laneId]}`}
+              className={`group absolute top-3 h-11 cursor-grab rounded-xl px-3 py-2 text-sm font-semibold shadow-[0_10px_20px_-12px_rgba(15,23,42,0.6)] ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.65)] active:cursor-grabbing ${laneColors[laneId]}`}
               style={{ left, width, top }}
               onPointerDown={(event) => {
                 event.preventDefault()
@@ -87,7 +87,7 @@ function GanttLane({
               {task.title}
               <div
                 role="presentation"
-                className="absolute right-1 top-1/2 h-6 w-2 -translate-y-1/2 cursor-ew-resize rounded-full bg-white/80 opacity-0 shadow-sm transition group-hover:opacity-100"
+                className="absolute right-1 top-1/2 h-6 w-2 -translate-y-1/2 cursor-ew-resize rounded-full bg-white/80 opacity-0 shadow-sm transition group-hover:opacity-100 group-active:opacity-100"
                 onPointerDown={(event) => {
                   event.stopPropagation()
                   event.preventDefault()

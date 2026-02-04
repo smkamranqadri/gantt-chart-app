@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import GanttLane from './components/GanttLane'
 import TaskModal from './components/TaskModal'
 import WeekHeader from './components/WeekHeader'
@@ -26,6 +26,7 @@ function App() {
   const [tasks, setTasks] = useState<Task[]>(seedTasks)
   const [dragState, setDragState] = useState<DragState | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const addTaskButtonRef = useRef<HTMLButtonElement>(null)
 
   const weekStartDate = parseDate(weekStart)
   const weekDays = Array.from({ length: 7 }, (_, index) =>
@@ -98,8 +99,8 @@ function App() {
   }, [dragState, taskIndexMap, weekStartDate])
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto flex w-full max-w-6xl flex-col px-4 py-8 sm:px-6 sm:py-10">
+    <div className="page-fade-in min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
+      <div className="mx-auto flex w-full max-w-6xl flex-col px-4 pb-16 pt-8 sm:px-6 sm:pt-10">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">
@@ -116,12 +117,13 @@ function App() {
             type="button"
             className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             onClick={() => setIsModalOpen(true)}
+            ref={addTaskButtonRef}
           >
             + Task
           </button>
         </div>
 
-        <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_60px_-40px_rgba(15,23,42,0.45)]">
           <div className="overflow-x-auto">
             <div className="min-w-[1000px]">
               <WeekHeader days={weekDays} />
@@ -172,6 +174,7 @@ function App() {
           setTasks((prev) => [...prev, task])
           setIsModalOpen(false)
         }}
+        triggerRef={addTaskButtonRef}
       />
     </div>
   )

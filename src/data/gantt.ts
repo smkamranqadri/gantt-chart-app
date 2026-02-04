@@ -12,9 +12,9 @@ export const laneLabels: Record<LaneId, string> = {
 }
 
 export const laneColors: Record<LaneId, string> = {
-  backend: 'bg-indigo-500 text-white',
-  frontend: 'bg-emerald-500 text-white',
-  qa: 'bg-amber-500 text-slate-900',
+  backend: 'bg-gradient-to-r from-indigo-500 to-indigo-400 text-white',
+  frontend: 'bg-gradient-to-r from-emerald-500 to-emerald-400 text-white',
+  qa: 'bg-gradient-to-r from-amber-400 to-amber-300 text-slate-900',
 }
 
 export const tasks: Task[] = [

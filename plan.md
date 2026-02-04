@@ -12,6 +12,7 @@ Phased plan so you can test and commit after each phase.
 6. Organize the app into multiple files (types, helpers, components) where it improves readability and maintainability across the entire app.
 7. Ensure responsive behavior across mobile and desktop (no broken layouts; prefer horizontal scroll for fixed grids when needed).
 8. Before each commit, run `npm run build` to ensure the build succeeds.
+9. Frontend security hygiene: avoid `dangerouslySetInnerHTML`, validate/normalize any user input, and keep external resources minimal.
 
 ## Phase 1 — Scaffold + Tailwind
 
@@ -50,5 +51,7 @@ Test/Commit: add tasks, validate errors, ensure new tasks render correctly.
 
 1. Tune Tailwind styling (lane backgrounds, bar colors, spacing).
 2. Add brief run instructions to `README.md`.
+3. Add accessibility pass (modal semantics, focus management, keyboard close, cursor affordances).
+4. Add subtle motion polish (page-load fade-in, smooth scrolling, link/button hover states).
 
 Test/Commit: final visual pass and sanity check.

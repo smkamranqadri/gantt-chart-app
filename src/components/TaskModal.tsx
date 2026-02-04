@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { LaneId, Task } from '../types/gantt'
 import { formatDate } from '../helpers/date'
 
@@ -15,20 +15,50 @@ type TaskModalProps = {
   weekStart: Date
   onClose: () => void
   onSubmit: (task: Task) => void
+  triggerRef?: React.RefObject<HTMLButtonElement | null>
 }
 
-function TaskModal({ isOpen, weekStart, onClose, onSubmit }: TaskModalProps) {
+function TaskModal({
+  isOpen,
+  weekStart,
+  onClose,
+  onSubmit,
+  triggerRef,
+}: TaskModalProps) {
   const [title, setTitle] = useState('')
   const [laneId, setLaneId] = useState<LaneId>('backend')
   const [start, setStart] = useState(formatDate(weekStart))
   const [end, setEnd] = useState(formatDate(weekStart))
   const [error, setError] = useState('')
+  const titleInputRef = useRef<HTMLInputElement>(null)
 
   const range = useMemo(() => {
     const startDate = formatDate(weekStart)
     const endDate = formatDate(new Date(weekStart.getTime() + 6 * 86400000))
     return { startDate, endDate }
   }, [weekStart])
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const previousActive = document.activeElement as HTMLElement | null
+    const triggerElement = triggerRef?.current ?? null
+    titleInputRef.current?.focus()
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      triggerElement?.focus()
+      previousActive?.focus?.()
+    }
+  }, [isOpen, onClose, triggerRef])
 
   if (!isOpen) return null
 
@@ -68,13 +98,25 @@ function TaskModal({ isOpen, weekStart, onClose, onSubmit }: TaskModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      <div
+        className="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-6 shadow-xl"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="task-modal-title"
+        aria-describedby="task-modal-description"
+      >
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">
+            <h2
+              id="task-modal-title"
+              className="text-xl font-semibold text-slate-900"
+            >
               Add new task
             </h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <p
+              id="task-modal-description"
+              className="mt-1 text-sm text-slate-600"
+            >
               Choose a lane and date range within the current week.
             </p>
           </div>
@@ -82,6 +124,7 @@ function TaskModal({ isOpen, weekStart, onClose, onSubmit }: TaskModalProps) {
             type="button"
             className="rounded-full px-2 text-sm text-slate-500 hover:text-slate-700"
             onClick={onClose}
+            aria-label="Close modal"
           >
             ✕
           </button>
@@ -97,6 +140,7 @@ function TaskModal({ isOpen, weekStart, onClose, onSubmit }: TaskModalProps) {
               placeholder="Design review"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
+              ref={titleInputRef}
             />
           </div>
 
@@ -162,14 +206,14 @@ function TaskModal({ isOpen, weekStart, onClose, onSubmit }: TaskModalProps) {
           <div className="flex items-center justify-end gap-3">
             <button
               type="button"
-              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600"
+              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-800"
               onClick={onClose}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-md"
             >
               Add task
             </button>
