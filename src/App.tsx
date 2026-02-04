@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import GanttLane from './components/GanttLane'
+import TaskModal from './components/TaskModal'
 import WeekHeader from './components/WeekHeader'
 import {
   dayWidth,
@@ -24,6 +25,7 @@ type DragState = {
 function App() {
   const [tasks, setTasks] = useState<Task[]>(seedTasks)
   const [dragState, setDragState] = useState<DragState | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const weekStartDate = parseDate(weekStart)
   const weekDays = Array.from({ length: 7 }, (_, index) =>
@@ -113,6 +115,7 @@ function App() {
           <button
             type="button"
             className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            onClick={() => setIsModalOpen(true)}
           >
             + Task
           </button>
@@ -160,6 +163,16 @@ function App() {
           </div>
         </div>
       </div>
+
+      <TaskModal
+        isOpen={isModalOpen}
+        weekStart={weekStartDate}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={(task) => {
+          setTasks((prev) => [...prev, task])
+          setIsModalOpen(false)
+        }}
+      />
     </div>
   )
 }
