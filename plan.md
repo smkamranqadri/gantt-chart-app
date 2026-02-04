@@ -9,13 +9,17 @@ Phased plan so you can test and commit after each phase.
 3. Use one-line git commit messages for each phase checkpoint.
 4. Apply best UI/UX practices: clear hierarchy, spacing consistency, accessible contrast, and sensible cursor/interaction feedback.
 5. After each phase, pause for your testing and explicit approval. Only then I will commit and proceed to the next phase.
+6. Organize the app into multiple files (types, helpers, components) where it improves readability and maintainability across the entire app.
+7. Ensure responsive behavior across mobile and desktop (no broken layouts; prefer horizontal scroll for fixed grids when needed).
+8. Before each commit, run `npm run build` to ensure the build succeeds.
 
 ## Phase 1 — Scaffold + Tailwind
 
 1. Scaffold a new Vite React + TypeScript project in the current directory using npm.
 2. Install and configure TailwindCSS (postcss, autoprefixer), and wire Tailwind into `src/index.css` and `tailwind.config.*`.
 3. Add Prettier, ESLint, and Husky (config + scripts) and verify all run.
-4. Add minimal app shell to confirm Tailwind is active.
+4. Set up the base font (modern, legible) and ensure typography is consistent.
+5. Add minimal app shell to confirm Tailwind is active.
 
 Test/Commit: `npm install` then `npm run dev` — verify base page renders with Tailwind styles.
 
