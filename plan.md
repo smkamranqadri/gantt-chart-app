@@ -88,3 +88,11 @@ Test/Commit: create a task that spans before/after the week and verify rendering
 3. Add a short demo GIF in `README.md`.
 
 Test/Commit: verify undo, demo seeding behavior, and README GIF display.
+
+## Phase 10 — Deploy Setup
+
+1. Add deployment artifacts for CapRover (Dockerfile, nginx config, captain-definition).
+2. Update deploy script to build and deploy the Vite `dist` output.
+3. Clean up env examples to match this app and add `.env` to `.gitignore`.
+
+Test/Commit: run deploy script in dry mode (build + package), verify generated bundle structure.
