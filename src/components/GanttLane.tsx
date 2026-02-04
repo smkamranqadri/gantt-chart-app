@@ -127,6 +127,12 @@ function GanttLane({
                 }}
               >
                 <span className="block truncate">{task.title}</span>
+                <div className="pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-full opacity-0 transition group-hover:opacity-100">
+                  <div className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white shadow-lg">
+                    {task.start} → {task.end}
+                  </div>
+                  <div className="mx-auto h-2 w-2 -translate-y-1 rotate-45 rounded-sm bg-slate-900" />
+                </div>
                 {continuesBefore ? (
                   <span className="absolute -left-1 top-1/2 -translate-y-1/2 text-xs font-bold text-white/70">
                     ◀
