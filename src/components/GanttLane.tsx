@@ -9,9 +9,18 @@ type GanttLaneProps = {
   tasks: Task[]
   weekStart: string
   label: string
+  onDragStart: (task: Task, clientX: number) => void
+  onResizeStart: (task: Task, clientX: number) => void
 }
 
-function GanttLane({ laneId, tasks, weekStart, label }: GanttLaneProps) {
+function GanttLane({
+  laneId,
+  tasks,
+  weekStart,
+  label,
+  onDragStart,
+  onResizeStart,
+}: GanttLaneProps) {
   return (
     <div className="grid grid-cols-[160px_repeat(7,120px)]">
       <div className="grid place-items-center bg-slate-50 px-4 py-5 text-sm font-semibold text-slate-700 text-center">
@@ -35,10 +44,23 @@ function GanttLane({ laneId, tasks, weekStart, label }: GanttLaneProps) {
           return (
             <div
               key={task.id}
-              className={`absolute top-3 h-11 rounded-xl px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-black/5 ${laneColors[laneId]}`}
+              className={`group absolute top-3 h-11 cursor-grab rounded-xl px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-black/5 active:cursor-grabbing ${laneColors[laneId]}`}
               style={{ left, width }}
+              onPointerDown={(event) => {
+                event.preventDefault()
+                onDragStart(task, event.clientX)
+              }}
             >
               {task.title}
+              <div
+                role="presentation"
+                className="absolute right-1 top-1/2 h-6 w-2 -translate-y-1/2 cursor-ew-resize rounded-full bg-white/80 opacity-0 shadow-sm transition group-hover:opacity-100"
+                onPointerDown={(event) => {
+                  event.stopPropagation()
+                  event.preventDefault()
+                  onResizeStart(task, event.clientX)
+                }}
+              />
             </div>
           )
         })}

@@ -1,13 +1,99 @@
+import { useEffect, useMemo, useState } from 'react'
 import GanttLane from './components/GanttLane'
 import WeekHeader from './components/WeekHeader'
-import { laneIds, laneLabels, tasks, weekStart } from './data/gantt'
-import { addDays, parseDate } from './helpers/date'
+import {
+  dayWidth,
+  laneIds,
+  laneLabels,
+  tasks as seedTasks,
+  weekStart,
+} from './data/gantt'
+import { addDays, daysBetween, formatDate, parseDate } from './helpers/date'
+import type { Task } from './types/gantt'
+
+type DragMode = 'move' | 'resize'
+
+type DragState = {
+  taskId: string
+  mode: DragMode
+  startClientX: number
+  startIndex: number
+  endIndex: number
+}
 
 function App() {
+  const [tasks, setTasks] = useState<Task[]>(seedTasks)
+  const [dragState, setDragState] = useState<DragState | null>(null)
+
   const weekStartDate = parseDate(weekStart)
   const weekDays = Array.from({ length: 7 }, (_, index) =>
     addDays(weekStartDate, index),
   )
+
+  const taskIndexMap = useMemo(() => {
+    return new Map(
+      tasks.map((task) => [
+        task.id,
+        {
+          startIndex: daysBetween(weekStart, task.start),
+          endIndex: daysBetween(weekStart, task.end),
+        },
+      ]),
+    )
+  }, [tasks])
+
+  useEffect(() => {
+    if (!dragState) return
+
+    const handlePointerMove = (event: PointerEvent) => {
+      const deltaDays = Math.round(
+        (event.clientX - dragState.startClientX) / dayWidth,
+      )
+
+      setTasks((prev) =>
+        prev.map((task) => {
+          if (task.id !== dragState.taskId) return task
+
+          if (dragState.mode === 'move') {
+            const duration = dragState.endIndex - dragState.startIndex
+            const nextStart = Math.min(
+              Math.max(dragState.startIndex + deltaDays, 0),
+              6 - duration,
+            )
+            const nextEnd = nextStart + duration
+
+            return {
+              ...task,
+              start: formatDate(addDays(weekStartDate, nextStart)),
+              end: formatDate(addDays(weekStartDate, nextEnd)),
+            }
+          }
+
+          const nextEnd = Math.min(
+            Math.max(dragState.endIndex + deltaDays, dragState.startIndex),
+            6,
+          )
+
+          return {
+            ...task,
+            end: formatDate(addDays(weekStartDate, nextEnd)),
+          }
+        }),
+      )
+    }
+
+    const handlePointerUp = () => {
+      setDragState(null)
+    }
+
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', handlePointerUp)
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', handlePointerUp)
+    }
+  }, [dragState, taskIndexMap, weekStartDate])
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -45,6 +131,28 @@ function App() {
                     label={laneLabels[laneId]}
                     tasks={tasks.filter((task) => task.laneId === laneId)}
                     weekStart={weekStart}
+                    onDragStart={(task, clientX) => {
+                      const current = taskIndexMap.get(task.id)
+                      if (!current) return
+                      setDragState({
+                        taskId: task.id,
+                        mode: 'move',
+                        startClientX: clientX,
+                        startIndex: current.startIndex,
+                        endIndex: current.endIndex,
+                      })
+                    }}
+                    onResizeStart={(task, clientX) => {
+                      const current = taskIndexMap.get(task.id)
+                      if (!current) return
+                      setDragState({
+                        taskId: task.id,
+                        mode: 'resize',
+                        startClientX: clientX,
+                        startIndex: current.startIndex,
+                        endIndex: current.endIndex,
+                      })
+                    }}
                   />
                 ))}
               </div>
