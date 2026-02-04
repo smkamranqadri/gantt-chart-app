@@ -55,3 +55,32 @@ Test/Commit: add tasks, validate errors, ensure new tasks render correctly.
 4. Add subtle motion polish (page-load fade-in, smooth scrolling, link/button hover states).
 
 Test/Commit: final visual pass and sanity check.
+
+## Phase 6 — Week Awareness + Navigation
+
+1. Highlight the column for today when it falls within the visible week.
+2. Add week navigation (Prev/Next) and update header/columns accordingly.
+
+Test/Commit: verify today highlight and navigation updates the grid correctly.
+
+## Phase 7 — Cross-Lane Dragging + Drag UX
+
+1. Enable vertical drag across lanes (drop to change lane).
+2. Add drag ghost/opacity while dragging.
+
+Test/Commit: drag tasks across lanes; ensure laneId updates and ghost UX feels right.
+
+## Phase 8 — Multi-Week Tasks + Tooltip
+
+1. Allow tasks to span beyond the visible week (no clamping); render partial overlap within the week.
+2. Show tooltip on hover with exact start/end dates.
+
+Test/Commit: create a task that spans before/after the week and verify rendering + tooltip.
+
+## Phase 9 — Productivity + Demo Assets
+
+1. Add Undo (Ctrl+Z) for the last change (drag, resize, add task).
+2. Add a “Seed demo plan” button (first-time users) with multiple sample scenarios.
+3. Add a short demo GIF in `README.md`.
+
+Test/Commit: verify undo, demo seeding behavior, and README GIF display.
