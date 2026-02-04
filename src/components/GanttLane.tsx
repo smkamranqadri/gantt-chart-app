@@ -13,6 +13,9 @@ type GanttLaneProps = {
   weekStart: string
   label: string
   todayIndex: number | null
+  draggingTaskId: string | null
+  dragMode: 'move' | 'resize' | null
+  resizeDeltaPx: number
   onDragStart: (task: Task, clientX: number) => void
   onResizeStart: (task: Task, clientX: number) => void
 }
@@ -23,6 +26,9 @@ function GanttLane({
   weekStart,
   label,
   todayIndex,
+  draggingTaskId,
+  dragMode,
+  resizeDeltaPx,
   onDragStart,
   onResizeStart,
 }: GanttLaneProps) {
@@ -68,7 +74,10 @@ function GanttLane({
     totalRows * rowHeight + (totalRows - 1) * rowGap + rowOffset
 
   return (
-    <div className="grid grid-cols-[160px_repeat(7,120px)]">
+    <div
+      className="grid grid-cols-[160px_repeat(7,120px)]"
+      data-lane-id={laneId}
+    >
       <div className="grid place-items-center bg-slate-50 px-4 py-5 text-sm font-semibold text-slate-700 text-center">
         {label}
       </div>
@@ -89,7 +98,15 @@ function GanttLane({
         {taskBounds.map(
           ({ task, visibleStart, visibleEnd, startIndex, endIndex }) => {
             const left = visibleStart * dayWidth
-            const width = (visibleEnd - visibleStart + 1) * dayWidth
+            const baseWidth = (visibleEnd - visibleStart + 1) * dayWidth
+            const maxVisibleWidth = (totalDays - visibleStart) * dayWidth
+            const smoothWidth =
+              dragMode === 'resize' && draggingTaskId === task.id
+                ? Math.min(
+                    Math.max(baseWidth + resizeDeltaPx, dayWidth),
+                    maxVisibleWidth,
+                  )
+                : baseWidth
             const rowIndex = rowAssignments.get(task.id) ?? 0
             const top = rowOffset + rowIndex * (rowHeight + rowGap)
             const continuesBefore = startIndex < 0
@@ -100,8 +117,10 @@ function GanttLane({
                 key={task.id}
                 className={`group absolute top-3 h-11 cursor-grab rounded-xl px-3 py-2 text-sm font-semibold shadow-[0_10px_20px_-12px_rgba(15,23,42,0.6)] ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.65)] active:cursor-grabbing ${laneColors[laneId]} ${
                   continuesBefore ? 'rounded-l-sm' : ''
-                } ${continuesAfter ? 'rounded-r-sm' : ''}`}
-                style={{ left, width, top }}
+                } ${continuesAfter ? 'rounded-r-sm' : ''} ${
+                  draggingTaskId === task.id ? 'opacity-70' : ''
+                }`}
+                style={{ left, width: smoothWidth, top }}
                 onPointerDown={(event) => {
                   event.preventDefault()
                   onDragStart(task, event.clientX)

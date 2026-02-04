@@ -20,6 +20,7 @@ type DragState = {
   startClientX: number
   startIndex: number
   endIndex: number
+  latestClientX: number
 }
 
 function App() {
@@ -52,13 +53,28 @@ function App() {
     )
   }, [tasks, weekStartValue])
 
+  const getLaneIdFromPoint = (x: number, y: number) => {
+    const element = document.elementFromPoint(x, y)
+    if (!element) return null
+    const laneElement = element.closest('[data-lane-id]')
+    return laneElement?.getAttribute('data-lane-id') as Task['laneId'] | null
+  }
+
   useEffect(() => {
     if (!dragState) return
 
     const handlePointerMove = (event: PointerEvent) => {
+      setDragState((prev) =>
+        prev ? { ...prev, latestClientX: event.clientX } : prev,
+      )
+
       const deltaDays = Math.round(
         (event.clientX - dragState.startClientX) / dayWidth,
       )
+      const nextLaneId =
+        dragState.mode === 'move'
+          ? getLaneIdFromPoint(event.clientX, event.clientY)
+          : null
 
       setTasks((prev) =>
         prev.map((task) => {
@@ -76,23 +92,37 @@ function App() {
               ...task,
               start: formatDate(addDays(weekStartDate, nextStart)),
               end: formatDate(addDays(weekStartDate, nextEnd)),
+              laneId: nextLaneId ?? task.laneId,
             }
           }
 
-          const nextEnd = Math.min(
-            Math.max(dragState.endIndex + deltaDays, dragState.startIndex),
-            6,
-          )
-
-          return {
-            ...task,
-            end: formatDate(addDays(weekStartDate, nextEnd)),
-          }
+          return task
         }),
       )
     }
 
     const handlePointerUp = () => {
+      if (dragState.mode === 'resize') {
+        const deltaDays = Math.round(
+          (dragState.latestClientX - dragState.startClientX) / dayWidth,
+        )
+
+        setTasks((prev) =>
+          prev.map((task) => {
+            if (task.id !== dragState.taskId) return task
+
+            const nextEnd = Math.min(
+              Math.max(dragState.endIndex + deltaDays, dragState.startIndex),
+              6,
+            )
+
+            return {
+              ...task,
+              end: formatDate(addDays(weekStartDate, nextEnd)),
+            }
+          }),
+        )
+      }
       setDragState(null)
     }
 
@@ -165,6 +195,13 @@ function App() {
                     tasks={tasks.filter((task) => task.laneId === laneId)}
                     weekStart={weekStartValue}
                     todayIndex={todayIndex}
+                    draggingTaskId={dragState?.taskId ?? null}
+                    dragMode={dragState?.mode ?? null}
+                    resizeDeltaPx={
+                      dragState?.mode === 'resize'
+                        ? dragState.latestClientX - dragState.startClientX
+                        : 0
+                    }
                     onDragStart={(task, clientX) => {
                       const current = taskIndexMap.get(task.id)
                       if (!current) return
@@ -174,6 +211,7 @@ function App() {
                         startClientX: clientX,
                         startIndex: current.startIndex,
                         endIndex: current.endIndex,
+                        latestClientX: clientX,
                       })
                     }}
                     onResizeStart={(task, clientX) => {
@@ -185,6 +223,7 @@ function App() {
                         startClientX: clientX,
                         startIndex: current.startIndex,
                         endIndex: current.endIndex,
+                        latestClientX: clientX,
                       })
                     }}
                   />

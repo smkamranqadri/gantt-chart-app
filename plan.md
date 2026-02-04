@@ -60,6 +60,9 @@ Test/Commit: final visual pass and sanity check.
 
 1. Highlight the column for today when it falls within the visible week.
 2. Add week navigation (Prev/Next) and update header/columns accordingly.
+3. Allow tasks to render beyond the visible week (clip to overlap only).
+4. Permit task creation for any date range.
+5. Add multi-week indicators (left/right continuation cues).
 
 Test/Commit: verify today highlight and navigation updates the grid correctly.
 
@@ -67,6 +70,7 @@ Test/Commit: verify today highlight and navigation updates the grid correctly.
 
 1. Enable vertical drag across lanes (drop to change lane).
 2. Add drag ghost/opacity while dragging.
+3. Smooth resize preview while dragging; snap to day on release.
 
 Test/Commit: drag tasks across lanes; ensure laneId updates and ghost UX feels right.
 
