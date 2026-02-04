@@ -26,24 +26,31 @@ function App() {
   const [tasks, setTasks] = useState<Task[]>(seedTasks)
   const [dragState, setDragState] = useState<DragState | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [weekStartDate, setWeekStartDate] = useState(parseDate(weekStart))
   const addTaskButtonRef = useRef<HTMLButtonElement>(null)
 
-  const weekStartDate = parseDate(weekStart)
+  const weekStartValue = formatDate(weekStartDate)
   const weekDays = Array.from({ length: 7 }, (_, index) =>
     addDays(weekStartDate, index),
   )
+
+  const todayIndex = useMemo(() => {
+    const today = formatDate(new Date())
+    const index = daysBetween(weekStartValue, today)
+    return index >= 0 && index <= 6 ? index : null
+  }, [weekStartValue])
 
   const taskIndexMap = useMemo(() => {
     return new Map(
       tasks.map((task) => [
         task.id,
         {
-          startIndex: daysBetween(weekStart, task.start),
-          endIndex: daysBetween(weekStart, task.end),
+          startIndex: daysBetween(weekStartValue, task.start),
+          endIndex: daysBetween(weekStartValue, task.end),
         },
       ]),
     )
-  }, [tasks])
+  }, [tasks, weekStartValue])
 
   useEffect(() => {
     if (!dragState) return
@@ -104,7 +111,7 @@ function App() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">
-              Week of {weekStart}
+              Week of {weekStartValue}
             </div>
             <h1 className="mt-3 text-3xl font-semibold text-slate-900 sm:text-4xl">
               Gantt Chart Proof of Concept
@@ -113,20 +120,41 @@ function App() {
               Static layout for a 7-day sprint (Mon–Sun).
             </p>
           </div>
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-            onClick={() => setIsModalOpen(true)}
-            ref={addTaskButtonRef}
-          >
-            + Task
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1 shadow-sm">
+              <button
+                type="button"
+                className="rounded-full px-3 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                onClick={() => setWeekStartDate(addDays(weekStartDate, -7))}
+              >
+                Prev
+              </button>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Week
+              </span>
+              <button
+                type="button"
+                className="rounded-full px-3 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                onClick={() => setWeekStartDate(addDays(weekStartDate, 7))}
+              >
+                Next
+              </button>
+            </div>
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              onClick={() => setIsModalOpen(true)}
+              ref={addTaskButtonRef}
+            >
+              + Task
+            </button>
+          </div>
         </div>
 
         <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_60px_-40px_rgba(15,23,42,0.45)]">
           <div className="overflow-x-auto">
             <div className="min-w-[1000px]">
-              <WeekHeader days={weekDays} />
+              <WeekHeader days={weekDays} todayIndex={todayIndex} />
 
               <div className="divide-y divide-slate-200">
                 {laneIds.map((laneId) => (
@@ -135,7 +163,8 @@ function App() {
                     laneId={laneId}
                     label={laneLabels[laneId]}
                     tasks={tasks.filter((task) => task.laneId === laneId)}
-                    weekStart={weekStart}
+                    weekStart={weekStartValue}
+                    todayIndex={todayIndex}
                     onDragStart={(task, clientX) => {
                       const current = taskIndexMap.get(task.id)
                       if (!current) return

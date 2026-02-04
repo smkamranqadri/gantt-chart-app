@@ -12,6 +12,7 @@ type GanttLaneProps = {
   tasks: Task[]
   weekStart: string
   label: string
+  todayIndex: number | null
   onDragStart: (task: Task, clientX: number) => void
   onResizeStart: (task: Task, clientX: number) => void
 }
@@ -21,26 +22,43 @@ function GanttLane({
   tasks,
   weekStart,
   label,
+  todayIndex,
   onDragStart,
   onResizeStart,
 }: GanttLaneProps) {
-  const sortedTasks = [...tasks].sort(
-    (a, b) => daysBetween(weekStart, a.start) - daysBetween(weekStart, b.start),
+  const taskBounds = tasks
+    .map((task) => {
+      const startIndex = daysBetween(weekStart, task.start)
+      const endIndex = daysBetween(weekStart, task.end)
+      const visibleStart = Math.max(startIndex, 0)
+      const visibleEnd = Math.min(endIndex, totalDays - 1)
+      const isVisible = visibleEnd >= 0 && visibleStart <= totalDays - 1
+      return {
+        task,
+        startIndex,
+        endIndex,
+        visibleStart,
+        visibleEnd,
+        isVisible,
+      }
+    })
+    .filter((item) => item.isVisible)
+
+  const sortedTasks = [...taskBounds].sort(
+    (a, b) => a.visibleStart - b.visibleStart,
   )
 
   const rowAssignments = new Map<string, number>()
   const rowEndIndices: number[] = []
 
-  sortedTasks.forEach((task) => {
-    const startIndex = daysBetween(weekStart, task.start)
-    const endIndex = daysBetween(weekStart, task.end)
-    const rowIndex = rowEndIndices.findIndex((end) => end < startIndex)
+  sortedTasks.forEach(({ task, visibleStart, visibleEnd }) => {
+    const rowIndex = rowEndIndices.findIndex((end) => end < visibleStart)
 
     if (rowIndex === -1) {
-      rowEndIndices.push(endIndex)
+      rowEndIndices.push(visibleEnd)
       rowAssignments.set(task.id, rowEndIndices.length - 1)
     } else {
-      rowEndIndices[rowIndex] = endIndex
+      rowEndIndices[rowIndex] = visibleEnd
       rowAssignments.set(task.id, rowIndex)
     }
   })
@@ -62,41 +80,57 @@ function GanttLane({
           {Array.from({ length: totalDays }, (_, index) => (
             <div
               key={index}
-              className="border-l border-dashed border-slate-200"
+              className={`border-l border-dashed border-slate-200 ${
+                todayIndex === index ? 'bg-sky-50/60' : ''
+              }`}
             />
           ))}
         </div>
-        {tasks.map((task) => {
-          const startIndex = daysBetween(weekStart, task.start)
-          const endIndex = daysBetween(weekStart, task.end)
-          const left = startIndex * dayWidth
-          const width = (endIndex - startIndex + 1) * dayWidth
-          const rowIndex = rowAssignments.get(task.id) ?? 0
-          const top = rowOffset + rowIndex * (rowHeight + rowGap)
+        {taskBounds.map(
+          ({ task, visibleStart, visibleEnd, startIndex, endIndex }) => {
+            const left = visibleStart * dayWidth
+            const width = (visibleEnd - visibleStart + 1) * dayWidth
+            const rowIndex = rowAssignments.get(task.id) ?? 0
+            const top = rowOffset + rowIndex * (rowHeight + rowGap)
+            const continuesBefore = startIndex < 0
+            const continuesAfter = endIndex > totalDays - 1
 
-          return (
-            <div
-              key={task.id}
-              className={`group absolute top-3 h-11 cursor-grab rounded-xl px-3 py-2 text-sm font-semibold shadow-[0_10px_20px_-12px_rgba(15,23,42,0.6)] ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.65)] active:cursor-grabbing ${laneColors[laneId]}`}
-              style={{ left, width, top }}
-              onPointerDown={(event) => {
-                event.preventDefault()
-                onDragStart(task, event.clientX)
-              }}
-            >
-              {task.title}
+            return (
               <div
-                role="presentation"
-                className="absolute right-1 top-1/2 h-6 w-2 -translate-y-1/2 cursor-ew-resize rounded-full bg-white/80 opacity-0 shadow-sm transition group-hover:opacity-100 group-active:opacity-100"
+                key={task.id}
+                className={`group absolute top-3 h-11 cursor-grab rounded-xl px-3 py-2 text-sm font-semibold shadow-[0_10px_20px_-12px_rgba(15,23,42,0.6)] ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.65)] active:cursor-grabbing ${laneColors[laneId]} ${
+                  continuesBefore ? 'rounded-l-sm' : ''
+                } ${continuesAfter ? 'rounded-r-sm' : ''}`}
+                style={{ left, width, top }}
                 onPointerDown={(event) => {
-                  event.stopPropagation()
                   event.preventDefault()
-                  onResizeStart(task, event.clientX)
+                  onDragStart(task, event.clientX)
                 }}
-              />
-            </div>
-          )
-        })}
+              >
+                <span className="block truncate">{task.title}</span>
+                {continuesBefore ? (
+                  <span className="absolute -left-1 top-1/2 -translate-y-1/2 text-xs font-bold text-white/70">
+                    ◀
+                  </span>
+                ) : null}
+                {continuesAfter ? (
+                  <span className="absolute -right-1 top-1/2 -translate-y-1/2 text-xs font-bold text-white/70">
+                    ▶
+                  </span>
+                ) : null}
+                <div
+                  role="presentation"
+                  className="absolute right-1 top-1/2 h-6 w-2 -translate-y-1/2 cursor-ew-resize rounded-full bg-white/80 opacity-0 shadow-sm transition group-hover:opacity-100 group-active:opacity-100"
+                  onPointerDown={(event) => {
+                    event.stopPropagation()
+                    event.preventDefault()
+                    onResizeStart(task, event.clientX)
+                  }}
+                />
+              </div>
+            )
+          },
+        )}
       </div>
     </div>
   )

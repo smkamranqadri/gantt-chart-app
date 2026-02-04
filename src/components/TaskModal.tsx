@@ -34,8 +34,7 @@ function TaskModal({
 
   const range = useMemo(() => {
     const startDate = formatDate(weekStart)
-    const endDate = formatDate(new Date(weekStart.getTime() + 6 * 86400000))
-    return { startDate, endDate }
+    return { startDate }
   }, [weekStart])
 
   useEffect(() => {
@@ -67,11 +66,6 @@ function TaskModal({
 
     if (!title.trim()) {
       setError('Title is required.')
-      return
-    }
-
-    if (start < range.startDate || end > range.endDate) {
-      setError('Dates must be within the visible week.')
       return
     }
 
@@ -117,7 +111,7 @@ function TaskModal({
               id="task-modal-description"
               className="mt-1 text-sm text-slate-600"
             >
-              Choose a lane and date range within the current week.
+              Choose a lane and date range for the task.
             </p>
           </div>
           <button
@@ -169,8 +163,6 @@ function TaskModal({
               <input
                 type="date"
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                min={range.startDate}
-                max={range.endDate}
                 value={start}
                 onChange={(event) => setStart(event.target.value)}
               />
@@ -182,8 +174,6 @@ function TaskModal({
               <input
                 type="date"
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                min={range.startDate}
-                max={range.endDate}
                 value={end}
                 onChange={(event) => setEnd(event.target.value)}
               />
@@ -197,10 +187,8 @@ function TaskModal({
           ) : null}
 
           <div className="flex items-center justify-between text-xs text-slate-500">
-            <span>
-              Range: {range.startDate} — {range.endDate}
-            </span>
-            <span>{totalDays}-day sprint</span>
+            <span>Default start: {range.startDate}</span>
+            <span>{totalDays}-day sprint view</span>
           </div>
 
           <div className="flex items-center justify-end gap-3">
