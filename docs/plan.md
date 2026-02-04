@@ -53,6 +53,8 @@ Test/Commit: add tasks, validate errors, ensure new tasks render correctly.
 2. Add brief run instructions to `README.md`.
 3. Add accessibility pass (modal semantics, focus management, keyboard close, cursor affordances).
 4. Add subtle motion polish (page-load fade-in, smooth scrolling, link/button hover states).
+5. Add focus-visible outlines and stronger today highlight for better visibility.
+6. Add a custom favicon.
 
 Test/Commit: final visual pass and sanity check.
 
@@ -63,6 +65,7 @@ Test/Commit: final visual pass and sanity check.
 3. Allow tasks to render beyond the visible week (clip to overlap only).
 4. Permit task creation for any date range.
 5. Add multi-week indicators (left/right continuation cues).
+6. Allow drag/resize to move tasks beyond the current week (no week clamping).
 
 Test/Commit: verify today highlight and navigation updates the grid correctly.
 
@@ -71,6 +74,7 @@ Test/Commit: verify today highlight and navigation updates the grid correctly.
 1. Enable vertical drag across lanes (drop to change lane).
 2. Add drag ghost/opacity while dragging.
 3. Smooth resize preview while dragging; snap to day on release.
+4. Refactor task rendering into a `TaskBar` component for readability.
 
 Test/Commit: drag tasks across lanes; ensure laneId updates and ghost UX feels right.
 
@@ -85,7 +89,8 @@ Test/Commit: create a task that spans before/after the week and verify rendering
 
 1. Add Undo/Redo (Ctrl+Z / Ctrl+Y) for the last change (drag, resize, add task).
 2. Add undo/redo buttons in the header for mouse users.
-3. Add a short demo GIF in `README.md`.
+3. Add a short demo GIF in `README.md` and store it under `docs/`.
+4. Move planning docs into `docs/` for organization.
 
 Test/Commit: verify undo/redo behavior and README GIF display.
 
