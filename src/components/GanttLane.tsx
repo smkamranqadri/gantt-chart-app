@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { LaneId, Task } from '../types/gantt'
 import { dayWidth, laneColors } from '../data/gantt'
 import { daysBetween } from '../helpers/date'
@@ -90,8 +91,8 @@ function GanttLane({
           {Array.from({ length: totalDays }, (_, index) => (
             <div
               key={index}
-              className={`border-l border-dashed border-slate-200 ${
-                todayIndex === index ? 'bg-sky-50/60' : ''
+              className={`border-l border-dashed border-slate-200/70 ${
+                todayIndex === index ? 'bg-sky-100/70' : ''
               }`}
             />
           ))}
@@ -135,4 +136,4 @@ function GanttLane({
   )
 }
 
-export default GanttLane
+export default memo(GanttLane)

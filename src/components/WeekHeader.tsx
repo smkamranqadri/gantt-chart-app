@@ -13,7 +13,7 @@ function WeekHeader({ days, todayIndex }: WeekHeaderProps) {
         <div
           key={formatDate(date)}
           className={`px-2 py-4 text-center ${
-            todayIndex === index ? 'bg-sky-50/80' : ''
+            todayIndex === index ? 'bg-sky-100/80 text-slate-700' : ''
           }`}
         >
           <div className="text-[11px] font-semibold text-slate-500">

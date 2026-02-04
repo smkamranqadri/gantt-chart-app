@@ -31,6 +31,7 @@ function TaskModal({
   const [end, setEnd] = useState(formatDate(weekStart))
   const [error, setError] = useState('')
   const titleInputRef = useRef<HTMLInputElement>(null)
+  const modalRef = useRef<HTMLDivElement>(null)
 
   const range = useMemo(() => {
     const startDate = formatDate(weekStart)
@@ -47,6 +48,21 @@ function TaskModal({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose()
+      }
+      if (event.key === 'Tab' && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        )
+        if (focusable.length === 0) return
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault()
+          last.focus()
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault()
+          first.focus()
+        }
       }
     }
 
@@ -98,6 +114,7 @@ function TaskModal({
         aria-modal="true"
         aria-labelledby="task-modal-title"
         aria-describedby="task-modal-description"
+        ref={modalRef}
       >
         <div className="flex items-start justify-between">
           <div>
@@ -181,7 +198,11 @@ function TaskModal({
           </div>
 
           {error ? (
-            <div className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            <div
+              className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700"
+              role="alert"
+              aria-live="polite"
+            >
               {error}
             </div>
           ) : null}

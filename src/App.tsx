@@ -21,6 +21,8 @@ type DragState = {
   startIndex: number
   endIndex: number
   latestClientX: number
+  startDate: string
+  endDate: string
 }
 
 function App() {
@@ -33,6 +35,7 @@ function App() {
   const addTaskButtonRef = useRef<HTMLButtonElement>(null)
   const historyRef = useRef<Task[][]>([])
   const redoRef = useRef<Task[][]>([])
+  const tasksRef = useRef<Task[]>(seedTasks)
 
   const weekStartValue = formatDate(weekStartDate)
   const weekDays = Array.from({ length: 7 }, (_, index) =>
@@ -58,12 +61,16 @@ function App() {
   }, [tasks, weekStartValue])
 
   useEffect(() => {
+    tasksRef.current = tasks
+  }, [tasks])
+
+  useEffect(() => {
     const handleUndo = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
         event.preventDefault()
         const previous = historyRef.current.pop()
         if (previous) {
-          redoRef.current.push(tasks.map((task) => ({ ...task })))
+          redoRef.current.push(tasksRef.current.map((task) => ({ ...task })))
           setTasks(previous)
           setCanUndo(historyRef.current.length > 0)
           setCanRedo(redoRef.current.length > 0)
@@ -77,7 +84,7 @@ function App() {
         event.preventDefault()
         const next = redoRef.current.pop()
         if (next) {
-          historyRef.current.push(tasks.map((task) => ({ ...task })))
+          historyRef.current.push(tasksRef.current.map((task) => ({ ...task })))
           setTasks(next)
           setCanUndo(historyRef.current.length > 0)
           setCanRedo(redoRef.current.length > 0)
@@ -87,7 +94,7 @@ function App() {
 
     window.addEventListener('keydown', handleUndo)
     return () => window.removeEventListener('keydown', handleUndo)
-  }, [tasks])
+  }, [])
 
   const pushHistory = (snapshot: Task[]) => {
     historyRef.current.push(snapshot.map((task) => ({ ...task })))
@@ -99,7 +106,7 @@ function App() {
   const handleUndoClick = () => {
     const previous = historyRef.current.pop()
     if (previous) {
-      redoRef.current.push(tasks.map((task) => ({ ...task })))
+      redoRef.current.push(tasksRef.current.map((task) => ({ ...task })))
       setTasks(previous)
       setCanUndo(historyRef.current.length > 0)
       setCanRedo(redoRef.current.length > 0)
@@ -109,7 +116,7 @@ function App() {
   const handleRedoClick = () => {
     const next = redoRef.current.pop()
     if (next) {
-      historyRef.current.push(tasks.map((task) => ({ ...task })))
+      historyRef.current.push(tasksRef.current.map((task) => ({ ...task })))
       setTasks(next)
       setCanUndo(historyRef.current.length > 0)
       setCanRedo(redoRef.current.length > 0)
@@ -144,17 +151,12 @@ function App() {
           if (task.id !== dragState.taskId) return task
 
           if (dragState.mode === 'move') {
-            const duration = dragState.endIndex - dragState.startIndex
-            const nextStart = Math.min(
-              Math.max(dragState.startIndex + deltaDays, 0),
-              6 - duration,
-            )
-            const nextEnd = nextStart + duration
-
             return {
               ...task,
-              start: formatDate(addDays(weekStartDate, nextStart)),
-              end: formatDate(addDays(weekStartDate, nextEnd)),
+              start: formatDate(
+                addDays(parseDate(dragState.startDate), deltaDays),
+              ),
+              end: formatDate(addDays(parseDate(dragState.endDate), deltaDays)),
               laneId: nextLaneId ?? task.laneId,
             }
           }
@@ -174,14 +176,16 @@ function App() {
           prev.map((task) => {
             if (task.id !== dragState.taskId) return task
 
-            const nextEnd = Math.min(
-              Math.max(dragState.endIndex + deltaDays, dragState.startIndex),
-              6,
-            )
+            const nextEndDate = addDays(parseDate(dragState.endDate), deltaDays)
+            const startDate = parseDate(dragState.startDate)
+            const safeEnd =
+              nextEndDate.getTime() < startDate.getTime()
+                ? startDate
+                : nextEndDate
 
             return {
               ...task,
-              end: formatDate(addDays(weekStartDate, nextEnd)),
+              end: formatDate(safeEnd),
             }
           }),
         )
@@ -264,7 +268,7 @@ function App() {
           </div>
         </div>
 
-        <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_60px_-40px_rgba(15,23,42,0.45)]">
+        <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_20px_60px_-40px_rgba(15,23,42,0.45)]">
           <div className="overflow-x-auto">
             <div className="min-w-[1000px]">
               <WeekHeader days={weekDays} todayIndex={todayIndex} />
@@ -296,6 +300,8 @@ function App() {
                         startIndex: current.startIndex,
                         endIndex: current.endIndex,
                         latestClientX: clientX,
+                        startDate: task.start,
+                        endDate: task.end,
                       })
                     }}
                     onResizeStart={(task, clientX) => {
@@ -309,6 +315,8 @@ function App() {
                         startIndex: current.startIndex,
                         endIndex: current.endIndex,
                         latestClientX: clientX,
+                        startDate: task.start,
+                        endDate: task.end,
                       })
                     }}
                   />

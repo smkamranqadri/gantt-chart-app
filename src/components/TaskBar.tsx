@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { Task } from '../types/gantt'
 
 type TaskBarProps = {
@@ -27,7 +28,7 @@ function TaskBar({
 }: TaskBarProps) {
   return (
     <div
-      className={`group absolute top-3 h-11 cursor-grab rounded-xl px-3 py-2 text-sm font-semibold shadow-[0_10px_20px_-12px_rgba(15,23,42,0.6)] ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.65)] active:cursor-grabbing ${className} ${
+      className={`group absolute top-3 h-11 cursor-grab rounded-xl px-3 py-2 text-sm font-semibold shadow-[0_10px_20px_-12px_rgba(15,23,42,0.6)] ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.65)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-700 active:cursor-grabbing ${className} ${
         continuesBefore ? 'rounded-l-sm' : ''
       } ${continuesAfter ? 'rounded-r-sm' : ''} ${
         isDragging ? 'opacity-70' : ''
@@ -68,4 +69,4 @@ function TaskBar({
   )
 }
 
-export default TaskBar
+export default memo(TaskBar)
