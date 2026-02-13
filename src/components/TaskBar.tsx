@@ -15,6 +15,8 @@ type TaskBarProps = {
   onEditRequest: (taskId: string) => void
   dependencySummary: string | null
   dependencyCount: number
+  isCritical: boolean
+  criticalOrderLabel: string | null
 }
 
 function TaskBar({
@@ -31,10 +33,16 @@ function TaskBar({
   onEditRequest,
   dependencySummary,
   dependencyCount,
+  isCritical,
+  criticalOrderLabel,
 }: TaskBarProps) {
+  const ringClassName = isCritical
+    ? 'ring-2 ring-amber-300 shadow-[0_10px_24px_-10px_rgba(180,83,9,0.75)]'
+    : 'ring-1 ring-black/5'
+
   return (
     <div
-      className={`group absolute top-3 h-11 cursor-grab rounded-xl px-3 py-2 text-sm font-semibold shadow-[0_10px_20px_-12px_rgba(15,23,42,0.6)] ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.65)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-700 active:cursor-grabbing ${className} ${
+      className={`group absolute top-3 h-11 cursor-grab rounded-xl px-3 py-2 text-sm font-semibold shadow-[0_10px_20px_-12px_rgba(15,23,42,0.6)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.65)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-700 active:cursor-grabbing ${ringClassName} ${className} ${
         continuesBefore ? 'rounded-l-sm' : ''
       } ${continuesAfter ? 'rounded-r-sm' : ''} ${
         isDragging ? 'opacity-70' : ''
@@ -52,6 +60,11 @@ function TaskBar({
       }}
     >
       <span className="block truncate">{task.title}</span>
+      {isCritical ? (
+        <span className="absolute left-2 top-1 rounded-full bg-amber-100/95 px-2 py-0.5 text-[10px] font-semibold text-amber-900">
+          Critical {criticalOrderLabel ?? ''}
+        </span>
+      ) : null}
       {dependencyCount > 0 ? (
         <span className="absolute right-2 top-1 rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
           Deps: {dependencyCount}
@@ -62,6 +75,11 @@ function TaskBar({
           <div>
             {task.start} → {task.end}
           </div>
+          {isCritical ? (
+            <div className="mt-1 text-[11px] text-amber-200">
+              Critical path {criticalOrderLabel ?? ''}
+            </div>
+          ) : null}
           {dependencySummary ? (
             <div className="mt-1 max-w-[260px] text-[11px] text-slate-200">
               {dependencySummary}

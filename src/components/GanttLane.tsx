@@ -22,6 +22,8 @@ type GanttLaneProps = {
   onResizeStart: (task: Task, clientX: number) => void
   onEditRequest: (taskId: string) => void
   dependencyLabelById: Map<string, string>
+  criticalTaskIdSet: ReadonlySet<string>
+  criticalOrderById: ReadonlyMap<string, number>
 }
 
 function GanttLane({
@@ -37,6 +39,8 @@ function GanttLane({
   onResizeStart,
   onEditRequest,
   dependencyLabelById,
+  criticalTaskIdSet,
+  criticalOrderById,
 }: GanttLaneProps) {
   const taskBounds = tasks
     .map((task) => {
@@ -126,6 +130,7 @@ function GanttLane({
                     )
                     .join(', ')}`
                 : null
+            const criticalOrder = criticalOrderById.get(task.id)
 
             return (
               <TaskBar
@@ -143,6 +148,10 @@ function GanttLane({
                 onEditRequest={onEditRequest}
                 dependencySummary={dependencySummary}
                 dependencyCount={task.dependsOn.length}
+                isCritical={criticalTaskIdSet.has(task.id)}
+                criticalOrderLabel={
+                  typeof criticalOrder === 'number' ? `#${criticalOrder}` : null
+                }
               />
             )
           },

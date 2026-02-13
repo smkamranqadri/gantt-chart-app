@@ -9,6 +9,7 @@ import {
   tasks as seedTasks,
   weekStart,
 } from './data/gantt'
+import { computeCriticalPath } from './helpers/criticalPath'
 import { addDays, daysBetween, formatDate, parseDate } from './helpers/date'
 import { normalizeTasks } from './helpers/taskModel'
 import type { Task } from './types/gantt'
@@ -70,6 +71,26 @@ function App() {
     () => new Map(tasks.map((task) => [task.id, task.title])),
     [tasks],
   )
+  const criticalPathComputation = useMemo(
+    () => computeCriticalPath(tasks),
+    [tasks],
+  )
+  const criticalTaskIdSet = useMemo(() => {
+    const orderedTaskIds = criticalPathComputation.result?.orderedTaskIds ?? []
+    return new Set(orderedTaskIds)
+  }, [criticalPathComputation.result])
+  const criticalOrderById = useMemo(() => {
+    const orderedTaskIds = criticalPathComputation.result?.orderedTaskIds ?? []
+    return new Map(orderedTaskIds.map((taskId, index) => [taskId, index + 1]))
+  }, [criticalPathComputation.result])
+  const criticalPathSummary = useMemo(() => {
+    const orderedTaskIds = criticalPathComputation.result?.orderedTaskIds ?? []
+    if (orderedTaskIds.length === 0) return null
+
+    return orderedTaskIds
+      .map((taskId) => `${taskId} (${taskTitleById.get(taskId) ?? taskId})`)
+      .join(' -> ')
+  }, [criticalPathComputation.result, taskTitleById])
 
   const editingTask = useMemo(
     () => tasks.find((task) => task.id === editingTaskId) ?? null,
@@ -314,6 +335,27 @@ function App() {
           </div>
         </div>
 
+        <div className="mt-5 space-y-3">
+          {criticalPathComputation.warning ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              Critical path unavailable: {criticalPathComputation.warning}
+            </div>
+          ) : null}
+          {criticalPathComputation.result ? (
+            <div className="rounded-2xl border border-sky-100 bg-sky-50/80 px-4 py-3">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+                Critical Path
+                <span className="rounded-full bg-sky-100 px-2 py-1 text-[10px] tracking-[0.1em] text-sky-800">
+                  {criticalPathComputation.result.totalDays} days
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-slate-700">
+                {criticalPathSummary}
+              </p>
+            </div>
+          ) : null}
+        </div>
+
         <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_20px_60px_-40px_rgba(15,23,42,0.45)]">
           <div className="overflow-x-auto">
             <div className="min-w-[1000px]">
@@ -367,6 +409,8 @@ function App() {
                       })
                     }}
                     onEditRequest={openEditTaskModal}
+                    criticalTaskIdSet={criticalTaskIdSet}
+                    criticalOrderById={criticalOrderById}
                   />
                 ))}
               </div>
