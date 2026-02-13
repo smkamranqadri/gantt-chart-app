@@ -92,6 +92,9 @@ Compute and visualize critical path with reliable updates after schedule and dep
 
 ## Phase 4: Milestone Rendering + Timeline Rules (ID: 4)
 
+- Status: `completed`
+- Completed On: `2026-02-14`
+
 ### Goal
 
 Support milestone items as first-class timeline entities with zero-duration constraints and dependency participation.
