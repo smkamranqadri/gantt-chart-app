@@ -8,13 +8,11 @@
 
 ## Current Phase
 
-- ID: `1`
-- Name: `Domain Model Upgrade`
+- ID: `2`
+- Name: `Dependency Authoring UX`
 - Status: `completed`
-- Plan File: `.planning/phases/1/PLAN.md`
-- Verification File: `.planning/phases/1/VERIFICATION.md`
-- Verification Status: `pass-with-notes`
-- Completed On: `2026-02-13`
+- Plan File: `.planning/phases/2/PLAN.md`
+- Completed On: `2026-02-14`
 
 ## Decision Log
 
@@ -35,6 +33,9 @@
 - `2026-02-13`: Phase 1 decisions locked: tie-break uses `start` then `id`, existing cyclic data is preserved and reported invalid, and scope is domain-only with no dependency UI.
 - `2026-02-13`: Phase 1 implementation completed with passing lint, tests, and build checks.
 - `2026-02-14`: Phase 1 verification completed with passing lint, test, and build checks; no blocking defects found for phase scope.
+- `2026-02-14`: Phase 2 planning finalized for modal-based dependency authoring, double-click edit entry, searchable multi-select, and immediate validation UX.
+- `2026-02-14`: Phase 2 implementation completed with dependency create/edit/remove UI, dependency badges, and atomic submit undo semantics.
+- `2026-02-14`: Phase 2 automated checks completed successfully (`lint`, `test`, `build`).
 
 ## Open Risks
 
@@ -42,7 +43,8 @@
 - Critical-path algorithm quality depends on deterministic graph and duration calculations.
 - Dense dependency connectors may reduce readability without layout tuning.
 - In-memory-only storage can cause loss of user-entered data on refresh.
+- Task-bar double-click discoverability for edit mode may require UX polish if users expect explicit edit affordance.
 
 ## Next Action
 
-Run `$gsd-plan-phase 2` for Phase 2 dependency authoring UX planning.
+Run `$gsd-verify-work 2` for conversational UAT and verification artifact capture.

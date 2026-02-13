@@ -30,6 +30,9 @@ Introduce dependency-aware task data model and normalization layer without break
 
 ## Phase 2: Dependency Authoring UX (ID: 2)
 
+- Status: `completed`
+- Completed On: `2026-02-14`
+
 ### Goal
 
 Enable users to create, edit, and remove dependencies directly in UI with clear validation messaging.
