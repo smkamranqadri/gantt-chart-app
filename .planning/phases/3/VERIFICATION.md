@@ -4,9 +4,9 @@
 
 - Milestone: `Gantt Solo Pro`
 - Phase: `3`
-- Verification Date: `2026-02-14`
+- Verification Date: `2026-02-13`
 - Verifier: `codex`
-- Overall Status: `needs-follow-up`
+- Overall Status: `pass`
 
 ## Scope
 
@@ -19,9 +19,8 @@ Validation covers Phase 3 critical-path scope only:
 
 Items intentionally out of scope for this verification run:
 
-1. Manual browser UAT execution (not run yet).
-2. Dependency connector-line rendering (deferred by milestone roadmap).
-3. Backend/persistence behavior (out of milestone scope).
+1. Dependency connector-line rendering (deferred by milestone roadmap).
+2. Backend/persistence behavior (out of milestone scope).
 
 ## Inputs Reviewed
 
@@ -41,11 +40,11 @@ Items intentionally out of scope for this verification run:
 3. Tie-break (`start`, then `id`) is deterministic: `pass` (unit test coverage, deterministic-repeat test)
 4. Milestone contributes zero duration: `pass` (unit test coverage + helper behavior)
 5. Invalid cyclic graph returns warning and suppresses result: `pass` (unit test coverage + App warning gate)
-6. Top-toolbar summary renders for valid path: `deferred` (manual UAT required)
-7. Critical bar highlight and badge render correctly: `deferred` (manual UAT required)
-8. Move/resize of critical tasks recomputes highlight: `deferred` (manual UAT required)
-9. Undo/redo preserves critical-path recomputation behavior: `deferred` (manual UAT required)
-10. Non-regression of dependency authoring/week navigation: `deferred` (manual UAT required)
+6. Top-toolbar summary renders for valid path: `pass` (manual UAT test 1)
+7. Critical bar highlight and badge render correctly: `pass` (manual UAT tests 1, 4)
+8. Move/resize of critical tasks recomputes highlight: `pass` (manual UAT tests 2, 3)
+9. Undo/redo preserves critical-path recomputation behavior: `pass` (manual UAT test 6)
+10. Non-regression of dependency authoring/week navigation: `pass` (manual UAT test 8)
 
 ## Evidence
 
@@ -63,16 +62,18 @@ Items intentionally out of scope for this verification run:
 4. `src/components/GanttLane.tsx` propagates critical markers to task bars through `criticalTaskIdSet` and `criticalOrderById`.
 5. `src/components/TaskBar.tsx` renders critical visual treatment and tooltip metadata without removing dependency indicators.
 
+### Manual UAT checks
+
+1. Session file: `.planning/phases/3/3-UAT.md`
+2. Result summary: `8 passed`, `0 issues`, `0 skipped`, `0 pending`
+3. All Phase 3 manual scenarios completed and passed.
+
 ## Findings
 
 1. No blocking defects were observed from automated checks and code-level inspection.
-2. No implementation fixes were required during this verification run.
-
-## Blocking Gap
-
-1. Manual browser UAT has not been executed yet.
-2. Per verification policy for this phase, missing manual UAT is a hard blocker to full verification closure.
+2. Manual UAT completed with all test cases passed.
+3. No implementation fixes were required during this verification run.
 
 ## Recommendation
 
-Phase 3 verification is recorded as `needs-follow-up`. Execute manual UAT checklist for Phase 3 scenarios, then rerun `$gsd-verify-work 3` to close verification.
+Phase 3 verification is recorded as `pass`. Proceed to `$gsd-plan-phase 4`.
