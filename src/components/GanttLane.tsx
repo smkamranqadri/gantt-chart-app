@@ -8,6 +8,7 @@ const totalDays = 7
 const rowHeight = 56
 const rowGap = 12
 const rowOffset = 12
+const milestoneMarkerWidth = Math.round(dayWidth * 0.28)
 
 type GanttLaneProps = {
   laneId: LaneId
@@ -107,11 +108,20 @@ function GanttLane({
         </div>
         {taskBounds.map(
           ({ task, visibleStart, visibleEnd, startIndex, endIndex }) => {
-            const left = visibleStart * dayWidth
-            const baseWidth = (visibleEnd - visibleStart + 1) * dayWidth
+            const isMilestone = task.kind === 'milestone'
+            const left = isMilestone
+              ? visibleStart * dayWidth +
+                dayWidth / 2 -
+                milestoneMarkerWidth / 2
+              : visibleStart * dayWidth
+            const baseWidth = isMilestone
+              ? milestoneMarkerWidth
+              : (visibleEnd - visibleStart + 1) * dayWidth
             const maxVisibleWidth = (totalDays - visibleStart) * dayWidth
             const smoothWidth =
-              dragMode === 'resize' && draggingTaskId === task.id
+              !isMilestone &&
+              dragMode === 'resize' &&
+              draggingTaskId === task.id
                 ? Math.min(
                     Math.max(baseWidth + resizeDeltaPx, dayWidth),
                     maxVisibleWidth,

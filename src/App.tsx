@@ -27,6 +27,9 @@ type DragState = {
   endDate: string
 }
 
+const enforceMilestoneInvariant = (task: Task): Task =>
+  task.kind === 'milestone' ? { ...task, end: task.start } : task
+
 const initialTasks = normalizeTasks(seedTasks)
 
 function App() {
@@ -174,11 +177,14 @@ function App() {
   }
 
   const handleTaskSubmit = (task: Task, mode: TaskModalMode) => {
+    const normalizedTask = enforceMilestoneInvariant(task)
     pushHistory(tasksRef.current)
     setTasks((prev) =>
       mode === 'create'
-        ? [...prev, task]
-        : prev.map((current) => (current.id === task.id ? task : current)),
+        ? [...prev, normalizedTask]
+        : prev.map((current) =>
+            current.id === normalizedTask.id ? normalizedTask : current,
+          ),
     )
     handleModalClose()
   }
@@ -218,12 +224,17 @@ function App() {
           if (task.id !== dragState.taskId) return task
 
           if (dragState.mode === 'move') {
+            const nextStart = formatDate(
+              addDays(parseDate(dragState.startDate), deltaDays),
+            )
+            const shiftedEndDate = formatDate(
+              addDays(parseDate(dragState.endDate), deltaDays),
+            )
+
             return {
               ...task,
-              start: formatDate(
-                addDays(parseDate(dragState.startDate), deltaDays),
-              ),
-              end: formatDate(addDays(parseDate(dragState.endDate), deltaDays)),
+              start: nextStart,
+              end: task.kind === 'milestone' ? nextStart : shiftedEndDate,
               laneId: nextLaneId ?? task.laneId,
             }
           }
@@ -242,6 +253,12 @@ function App() {
         setTasks((prev) =>
           prev.map((task) => {
             if (task.id !== dragState.taskId) return task
+            if (task.kind === 'milestone') {
+              return {
+                ...task,
+                end: task.start,
+              }
+            }
 
             const nextEndDate = addDays(parseDate(dragState.endDate), deltaDays)
             const startDate = parseDate(dragState.startDate)
@@ -394,6 +411,7 @@ function App() {
                       })
                     }}
                     onResizeStart={(task, clientX) => {
+                      if (task.kind === 'milestone') return
                       const current = taskIndexMap.get(task.id)
                       if (!current) return
                       pushHistory(tasks)
