@@ -4,7 +4,7 @@ import {
   validateDependencySelection,
 } from '../helpers/dependencyAuthoring'
 import { formatDate } from '../helpers/date'
-import type { LaneId, Task } from '../types/gantt'
+import type { LaneId, Task, TaskKind } from '../types/gantt'
 
 const totalDays = 7
 
@@ -45,6 +45,9 @@ function TaskModal({
   const [title, setTitle] = useState(() =>
     isEditMode ? (initialTask?.title ?? '') : '',
   )
+  const [kind, setKind] = useState<TaskKind>(() =>
+    isEditMode ? (initialTask?.kind ?? 'task') : 'task',
+  )
   const [laneId, setLaneId] = useState<LaneId>(() =>
     isEditMode ? (initialTask?.laneId ?? 'backend') : 'backend',
   )
@@ -62,6 +65,7 @@ function TaskModal({
   const [dependencyError, setDependencyError] = useState('')
   const titleInputRef = useRef<HTMLInputElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
+  const isMilestone = kind === 'milestone'
 
   const range = useMemo(() => {
     return { startDate: defaultStartDate }
@@ -83,8 +87,8 @@ function TaskModal({
         title: title || (initialTask?.title ?? 'Draft task'),
         laneId,
         start,
-        end,
-        kind: initialTask?.kind ?? 'task',
+        end: isMilestone ? start : end,
+        kind,
         dependsOn,
       },
       selectedDependencyIds: dependsOn,
@@ -94,7 +98,9 @@ function TaskModal({
     allTasks,
     dependsOn,
     end,
+    kind,
     initialTask,
+    isMilestone,
     laneId,
     start,
     title,
@@ -144,6 +150,20 @@ function TaskModal({
 
   if (!isOpen) return null
 
+  const handleKindChange = (nextKind: TaskKind) => {
+    setKind(nextKind)
+    if (nextKind === 'milestone') {
+      setEnd(start)
+    }
+  }
+
+  const handleStartChange = (nextStart: string) => {
+    setStart(nextStart)
+    if (isMilestone) {
+      setEnd(nextStart)
+    }
+  }
+
   const handleDependencyToggle = (dependencyId: string, selected: boolean) => {
     const nextDependsOn = selected
       ? [...dependsOn, dependencyId]
@@ -156,8 +176,8 @@ function TaskModal({
         title: title || (initialTask?.title ?? 'Draft task'),
         laneId,
         start,
-        end,
-        kind: initialTask?.kind ?? 'task',
+        end: isMilestone ? start : end,
+        kind,
         dependsOn: nextDependsOn,
       },
       selectedDependencyIds: nextDependsOn,
@@ -176,13 +196,14 @@ function TaskModal({
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    const normalizedEnd = isMilestone ? start : end
 
     if (!title.trim()) {
       setError('Title is required.')
       return
     }
 
-    if (end < start) {
+    if (!isMilestone && end < start) {
       setError('End date must be the same or after start date.')
       return
     }
@@ -203,16 +224,17 @@ function TaskModal({
         title: title.trim(),
         laneId,
         start,
-        end,
-        kind: initialTask?.kind ?? 'task',
+        end: normalizedEnd,
+        kind,
         dependsOn,
       },
       activeMode,
     )
   }
 
+  const hasValidDateRange = isMilestone || end >= start
   const canSubmit =
-    title.trim().length > 0 && end >= start && dependencyValidation.valid
+    title.trim().length > 0 && hasValidDateRange && dependencyValidation.valid
   const dependencyMessage =
     dependencyError ||
     (!dependencyValidation.valid ? (dependencyValidation.reason ?? '') : '')
@@ -239,7 +261,7 @@ function TaskModal({
               id="task-modal-description"
               className="mt-1 text-sm text-slate-600"
             >
-              Define schedule and dependencies for this task.
+              Define type, schedule, and dependencies for this item.
             </p>
           </div>
           <button
@@ -268,6 +290,22 @@ function TaskModal({
 
           <div>
             <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Kind
+            </label>
+            <select
+              className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              value={kind}
+              onChange={(event) =>
+                handleKindChange(event.target.value as TaskKind)
+              }
+            >
+              <option value="task">Task</option>
+              <option value="milestone">Milestone</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               Lane
             </label>
             <select
@@ -292,7 +330,7 @@ function TaskModal({
                 type="date"
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={start}
-                onChange={(event) => setStart(event.target.value)}
+                onChange={(event) => handleStartChange(event.target.value)}
               />
             </div>
             <div>
@@ -303,8 +341,15 @@ function TaskModal({
                 type="date"
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={end}
+                disabled={isMilestone}
                 onChange={(event) => setEnd(event.target.value)}
               />
+              {isMilestone ? (
+                <p className="mt-1 text-xs text-slate-500">
+                  Milestones are zero-duration markers. End date is locked to
+                  start date.
+                </p>
+              ) : null}
             </div>
           </div>
 
