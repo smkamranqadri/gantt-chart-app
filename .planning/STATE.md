@@ -8,12 +8,12 @@
 
 ## Current Phase
 
-- ID: `2`
-- Name: `Dependency Authoring UX`
+- ID: `3`
+- Name: `Critical Path Engine + Visualization`
 - Status: `completed`
-- Plan File: `.planning/phases/2/PLAN.md`
-- Verification File: `.planning/phases/2/VERIFICATION.md`
-- Verification Status: `pass-with-notes`
+- Plan File: `.planning/phases/3/PLAN.md`
+- Verification File: `pending`
+- Verification Status: `pending`
 - Completed On: `2026-02-14`
 
 ## Decision Log
@@ -39,6 +39,9 @@
 - `2026-02-14`: Phase 2 implementation completed with dependency create/edit/remove UI, dependency badges, and atomic submit undo semantics.
 - `2026-02-14`: Phase 2 automated checks completed successfully (`lint`, `test`, `build`).
 - `2026-02-14`: Phase 2 verification recorded as pass-with-notes; no blocking defects found, manual browser UAT remains pending.
+- `2026-02-14`: Phase 3 decisions locked: scope is all tasks, duration metric is calendar days, milestone duration is zero, and tie-break is earliest `start` then `id`.
+- `2026-02-14`: Phase 3 decisions locked: recompute on every task mutation/undo/redo, and invalid graphs show non-blocking warning while suppressing critical-path highlights.
+- `2026-02-14`: Phase 3 implementation completed with critical-path engine, top-toolbar summary, task highlighting, and passing lint/test/build checks.
 
 ## Open Risks
 
@@ -47,7 +50,8 @@
 - Dense dependency connectors may reduce readability without layout tuning.
 - In-memory-only storage can cause loss of user-entered data on refresh.
 - Task-bar double-click discoverability for edit mode may require UX polish if users expect explicit edit affordance.
+- Phase 3 browser-level manual UAT is still required for full visual/interaction sign-off.
 
 ## Next Action
 
-Run `$gsd-plan-phase 3` for critical-path engine and visualization planning.
+Run `$gsd-verify-work 3` for critical path verification and UAT capture.

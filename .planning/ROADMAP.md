@@ -61,6 +61,9 @@ Enable users to create, edit, and remove dependencies directly in UI with clear 
 
 ## Phase 3: Critical Path Engine + Visualization (ID: 3)
 
+- Status: `completed`
+- Completed On: `2026-02-14`
+
 ### Goal
 
 Compute and visualize critical path with reliable updates after schedule and dependency changes.
