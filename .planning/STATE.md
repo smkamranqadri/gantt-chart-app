@@ -10,8 +10,9 @@
 
 - ID: `1`
 - Name: `Domain Model Upgrade`
-- Status: `planned`
+- Status: `completed`
 - Plan File: `.planning/phases/1/PLAN.md`
+- Completed On: `2026-02-13`
 
 ## Decision Log
 
@@ -27,6 +28,10 @@
 - `2026-02-13`: Milestone name set to Gantt Solo Pro.
 - `2026-02-13`: Definition of done set to feature demo complete.
 - `2026-02-13`: Phase 1 plan generated and ready for execution.
+- `2026-02-13`: Phase 1 execution started; state transitioned to in progress.
+- `2026-02-13`: Phase 1 decisions locked: Vitest in phase, dependency source-of-truth is `TaskV2.dependsOn`, invalid IDs are dropped during normalization.
+- `2026-02-13`: Phase 1 decisions locked: tie-break uses `start` then `id`, existing cyclic data is preserved and reported invalid, and scope is domain-only with no dependency UI.
+- `2026-02-13`: Phase 1 implementation completed with passing lint, tests, and build checks.
 
 ## Open Risks
 
@@ -37,4 +42,4 @@
 
 ## Next Action
 
-Run `$gsd-execute-phase` for Phase 1 using `.planning/phases/1/PLAN.md`.
+Run `$gsd-plan-phase 2` for Phase 2 dependency authoring UX planning.

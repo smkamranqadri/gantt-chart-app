@@ -6,7 +6,7 @@
 - Phase ID: `1`
 - Phase Name: `Domain Model Upgrade`
 - Owner: `codex`
-- Status: `ready`
+- Status: `completed`
 - Last Updated: `2026-02-13`
 
 ## Objective
@@ -157,3 +157,35 @@ Phase exits only when:
 Primary execution command after review:
 
 1. `$gsd-execute-phase`
+
+## Execution Summary
+
+### Completed Implementation
+
+1. Added Phase 1 type contracts and migration boundary in `src/types/gantt.ts`:
+   - `TaskKind`, `DependencyType`, `LegacyTask`, `TaskV2`, `DependencyEdge`, `CriticalPathResult`.
+2. Added normalization helpers in `src/helpers/taskModel.ts`:
+   - `normalizeTask(...)`
+   - `normalizeTasks(...)`
+3. Added dependency graph utilities in `src/helpers/dependencyGraph.ts`:
+   - adjacency map construction
+   - self-link check
+   - cycle prediction for proposed edges
+   - deterministic topological ordering
+   - graph validation reporting
+4. Integrated normalization at app boundary in `src/App.tsx` with unchanged user-visible behavior.
+5. Updated task creation defaults in `src/components/TaskModal.tsx` to produce `kind` and `dependsOn`.
+6. Added test tooling:
+   - `vitest` dev dependency
+   - `test` and `test:watch` scripts
+   - `vitest.config.ts`
+7. Added focused unit tests:
+   - `src/helpers/__tests__/taskModel.test.ts`
+   - `src/helpers/__tests__/dependencyGraph.test.ts`
+
+### Verification Results
+
+1. `npm run lint`: pass
+2. `npm run test`: pass
+3. `npm run build`: pass
+4. Manual regression checklist status: not fully automated; UI behavior intentionally unchanged and validated via build/lint/test gate for this execution pass.
