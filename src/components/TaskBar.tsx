@@ -12,6 +12,9 @@ type TaskBarProps = {
   continuesAfter: boolean
   onDragStart: (task: Task, clientX: number) => void
   onResizeStart: (task: Task, clientX: number) => void
+  onEditRequest: (taskId: string) => void
+  dependencySummary: string | null
+  dependencyCount: number
 }
 
 function TaskBar({
@@ -25,6 +28,9 @@ function TaskBar({
   continuesAfter,
   onDragStart,
   onResizeStart,
+  onEditRequest,
+  dependencySummary,
+  dependencyCount,
 }: TaskBarProps) {
   return (
     <div
@@ -35,14 +41,32 @@ function TaskBar({
       }`}
       style={{ left, width, top }}
       onPointerDown={(event) => {
+        if (event.detail > 1) return
         event.preventDefault()
         onDragStart(task, event.clientX)
       }}
+      onDoubleClick={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onEditRequest(task.id)
+      }}
     >
       <span className="block truncate">{task.title}</span>
+      {dependencyCount > 0 ? (
+        <span className="absolute right-2 top-1 rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+          Deps: {dependencyCount}
+        </span>
+      ) : null}
       <div className="pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-full opacity-0 transition group-hover:opacity-100">
         <div className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white shadow-lg">
-          {task.start} → {task.end}
+          <div>
+            {task.start} → {task.end}
+          </div>
+          {dependencySummary ? (
+            <div className="mt-1 max-w-[260px] text-[11px] text-slate-200">
+              {dependencySummary}
+            </div>
+          ) : null}
         </div>
         <div className="mx-auto h-2 w-2 -translate-y-1 rotate-45 rounded-sm bg-slate-900" />
       </div>

@@ -20,6 +20,8 @@ type GanttLaneProps = {
   resizeDeltaPx: number
   onDragStart: (task: Task, clientX: number) => void
   onResizeStart: (task: Task, clientX: number) => void
+  onEditRequest: (taskId: string) => void
+  dependencyLabelById: Map<string, string>
 }
 
 function GanttLane({
@@ -33,6 +35,8 @@ function GanttLane({
   resizeDeltaPx,
   onDragStart,
   onResizeStart,
+  onEditRequest,
+  dependencyLabelById,
 }: GanttLaneProps) {
   const taskBounds = tasks
     .map((task) => {
@@ -113,6 +117,15 @@ function GanttLane({
             const top = rowOffset + rowIndex * (rowHeight + rowGap)
             const continuesBefore = startIndex < 0
             const continuesAfter = endIndex > totalDays - 1
+            const dependencySummary =
+              task.dependsOn.length > 0
+                ? `Depends on: ${task.dependsOn
+                    .map(
+                      (dependencyId) =>
+                        `${dependencyId} (${dependencyLabelById.get(dependencyId) ?? dependencyId})`,
+                    )
+                    .join(', ')}`
+                : null
 
             return (
               <TaskBar
@@ -127,6 +140,9 @@ function GanttLane({
                 continuesAfter={continuesAfter}
                 onDragStart={onDragStart}
                 onResizeStart={onResizeStart}
+                onEditRequest={onEditRequest}
+                dependencySummary={dependencySummary}
+                dependencyCount={task.dependsOn.length}
               />
             )
           },

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import GanttLane from './components/GanttLane'
-import TaskModal from './components/TaskModal'
+import TaskModal, { type TaskModalMode } from './components/TaskModal'
 import WeekHeader from './components/WeekHeader'
 import {
   dayWidth,
@@ -32,6 +32,9 @@ function App() {
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [dragState, setDragState] = useState<DragState | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<TaskModalMode>('create')
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
+  const [modalSession, setModalSession] = useState(0)
   const [weekStartDate, setWeekStartDate] = useState(parseDate(weekStart))
   const [canUndo, setCanUndo] = useState(false)
   const [canRedo, setCanRedo] = useState(false)
@@ -62,6 +65,16 @@ function App() {
       ]),
     )
   }, [tasks, weekStartValue])
+
+  const taskTitleById = useMemo(
+    () => new Map(tasks.map((task) => [task.id, task.title])),
+    [tasks],
+  )
+
+  const editingTask = useMemo(
+    () => tasks.find((task) => task.id === editingTaskId) ?? null,
+    [tasks, editingTaskId],
+  )
 
   useEffect(() => {
     tasksRef.current = tasks
@@ -131,6 +144,36 @@ function App() {
     if (!element) return null
     const laneElement = element.closest('[data-lane-id]')
     return laneElement?.getAttribute('data-lane-id') as Task['laneId'] | null
+  }
+
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+    setModalMode('create')
+    setEditingTaskId(null)
+  }
+
+  const handleTaskSubmit = (task: Task, mode: TaskModalMode) => {
+    pushHistory(tasksRef.current)
+    setTasks((prev) =>
+      mode === 'create'
+        ? [...prev, task]
+        : prev.map((current) => (current.id === task.id ? task : current)),
+    )
+    handleModalClose()
+  }
+
+  const openCreateTaskModal = () => {
+    setModalMode('create')
+    setEditingTaskId(null)
+    setModalSession((prev) => prev + 1)
+    setIsModalOpen(true)
+  }
+
+  const openEditTaskModal = (taskId: string) => {
+    setModalMode('edit')
+    setEditingTaskId(taskId)
+    setModalSession((prev) => prev + 1)
+    setIsModalOpen(true)
   }
 
   useEffect(() => {
@@ -263,7 +306,7 @@ function App() {
             <button
               type="button"
               className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              onClick={() => setIsModalOpen(true)}
+              onClick={openCreateTaskModal}
               ref={addTaskButtonRef}
             >
               + Task
@@ -292,6 +335,7 @@ function App() {
                         ? dragState.latestClientX - dragState.startClientX
                         : 0
                     }
+                    dependencyLabelById={taskTitleById}
                     onDragStart={(task, clientX) => {
                       const current = taskIndexMap.get(task.id)
                       if (!current) return
@@ -322,6 +366,7 @@ function App() {
                         endDate: task.end,
                       })
                     }}
+                    onEditRequest={openEditTaskModal}
                   />
                 ))}
               </div>
@@ -331,14 +376,14 @@ function App() {
       </div>
 
       <TaskModal
+        key={`${modalMode}-${editingTaskId ?? 'new'}-${modalSession}`}
         isOpen={isModalOpen}
+        mode={modalMode}
         weekStart={weekStartDate}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={(task) => {
-          pushHistory(tasks)
-          setTasks((prev) => [...prev, task])
-          setIsModalOpen(false)
-        }}
+        allTasks={tasks}
+        initialTask={editingTask}
+        onClose={handleModalClose}
+        onSubmit={handleTaskSubmit}
         triggerRef={addTaskButtonRef}
       />
     </div>
