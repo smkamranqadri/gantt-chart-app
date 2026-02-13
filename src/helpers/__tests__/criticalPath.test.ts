@@ -116,6 +116,33 @@ describe('criticalPath', () => {
     })
   })
 
+  it('keeps milestones in the ordered critical path without adding duration', () => {
+    const tasks: Task[] = [
+      createTask({ id: 'task-a', start: '2026-02-02', end: '2026-02-03' }),
+      createTask({
+        id: 'milestone-a',
+        kind: 'milestone',
+        start: '2026-02-04',
+        end: '2026-02-04',
+        dependsOn: ['task-a'],
+      }),
+      createTask({
+        id: 'task-b',
+        start: '2026-02-05',
+        end: '2026-02-07',
+        dependsOn: ['milestone-a'],
+      }),
+    ]
+
+    const result = computeCriticalPath(tasks)
+
+    expect(result.warning).toBeNull()
+    expect(result.result).toEqual({
+      orderedTaskIds: ['task-a', 'milestone-a', 'task-b'],
+      totalDays: 5,
+    })
+  })
+
   it('returns warning and no result for cyclic graph', () => {
     const tasks: Task[] = [
       createTask({ id: 'task-a', dependsOn: ['task-b'] }),
