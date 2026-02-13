@@ -1,0 +1,23 @@
+{
+  "project_name": "gantt-chart-app",
+  "milestone_name": "Gantt Solo Pro",
+  "mode": "standalone",
+  "planning_depth": "decision-complete",
+  "parallelization": true,
+  "commit_docs": true,
+  "model_profile": "quality",
+  "workflow": {
+    "research": true,
+    "plan_check": true,
+    "verifier": true
+  },
+  "target_user": "solo-builders",
+  "strategy": "frontend-power-features",
+  "delivery_style": "mvp-then-scale",
+  "storage_model": "in-memory-no-persistence",
+  "definition_of_done": "feature-demo-complete",
+  "active_phase_id": "1",
+  "next_command": "gsd-plan-phase",
+  "created_from": "gsd-new-project",
+  "created_on": "2026-02-13"
+}
