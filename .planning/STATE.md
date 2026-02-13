@@ -8,13 +8,13 @@
 
 ## Current Phase
 
-- ID: `3`
-- Name: `Critical Path Engine + Visualization`
-- Status: `completed`
-- Plan File: `.planning/phases/3/PLAN.md`
-- Verification File: `.planning/phases/3/VERIFICATION.md`
-- Verification Status: `pass`
-- Completed On: `2026-02-14`
+- ID: `4`
+- Name: `Milestone Rendering + Timeline Rules`
+- Status: `planned`
+- Plan File: `.planning/phases/4/PLAN.md`
+- Verification File: `pending`
+- Verification Status: `pending`
+- Completed On: `pending`
 
 ## Decision Log
 
@@ -46,6 +46,8 @@
 - `2026-02-14`: Phase 3 verification outcome set to `needs-follow-up` because manual browser UAT is required and not yet executed.
 - `2026-02-13`: Manual Phase 3 UAT completed via `.planning/phases/3/3-UAT.md` with 8/8 tests passed and no reported issues.
 - `2026-02-13`: Phase 3 verification status closed as `pass` after successful manual UAT and no additional defects.
+- `2026-02-14`: Phase 4 research captured milestone-invariant enforcement strategy with no new dependency requirements.
+- `2026-02-14`: Phase 4 planning finalized for kind-based authoring, non-resizable milestones, marker rendering, and milestone dependency/critical-path participation.
 
 ## Open Risks
 
@@ -54,7 +56,15 @@
 - Dense dependency connectors may reduce readability without layout tuning.
 - In-memory-only storage can cause loss of user-entered data on refresh.
 - Task-bar double-click discoverability for edit mode may require UX polish if users expect explicit edit affordance.
+- Milestone marker visibility and readability can degrade in dense lanes without careful placement.
+- Milestone invariant drift can occur if any mutation path bypasses `start === end` coercion.
 
 ## Next Action
 
-Run `$gsd-plan-phase 4`.
+Run `$gsd-execute-phase 4`.
+
+## Session Continuity
+
+- Last Resumed: `2026-02-14 02:52:24 PKT`
+- Stopped At: `Phase 4 planning completed; ready to execute implementation waves.`
+- Resume File: `.planning/phases/4/PLAN.md`
