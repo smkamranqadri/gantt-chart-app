@@ -98,6 +98,8 @@ function TaskModal({
       laneId,
       start,
       end,
+      kind: 'task',
+      dependsOn: [],
     })
 
     setTitle('')

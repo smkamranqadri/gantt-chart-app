@@ -10,6 +10,7 @@ import {
   weekStart,
 } from './data/gantt'
 import { addDays, daysBetween, formatDate, parseDate } from './helpers/date'
+import { normalizeTasks } from './helpers/taskModel'
 import type { Task } from './types/gantt'
 
 type DragMode = 'move' | 'resize'
@@ -25,8 +26,10 @@ type DragState = {
   endDate: string
 }
 
+const initialTasks = normalizeTasks(seedTasks)
+
 function App() {
-  const [tasks, setTasks] = useState<Task[]>(seedTasks)
+  const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [dragState, setDragState] = useState<DragState | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [weekStartDate, setWeekStartDate] = useState(parseDate(weekStart))
@@ -35,7 +38,7 @@ function App() {
   const addTaskButtonRef = useRef<HTMLButtonElement>(null)
   const historyRef = useRef<Task[][]>([])
   const redoRef = useRef<Task[][]>([])
-  const tasksRef = useRef<Task[]>(seedTasks)
+  const tasksRef = useRef<Task[]>(initialTasks)
 
   const weekStartValue = formatDate(weekStartDate)
   const weekDays = Array.from({ length: 7 }, (_, index) =>

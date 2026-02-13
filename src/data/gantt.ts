@@ -1,4 +1,4 @@
-import type { LaneId, Task } from '../types/gantt'
+import type { LaneId, LegacyTask } from '../types/gantt'
 
 export const weekStart = '2026-02-02'
 export const dayWidth = 120
@@ -17,7 +17,7 @@ export const laneColors: Record<LaneId, string> = {
   qa: 'bg-gradient-to-r from-amber-400 to-amber-300 text-slate-900',
 }
 
-export const tasks: Task[] = [
+export const tasks: LegacyTask[] = [
   {
     id: 'task-1',
     title: 'API scaffolding',
