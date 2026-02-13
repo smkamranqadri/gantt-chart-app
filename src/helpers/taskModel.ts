@@ -14,6 +14,10 @@ export const normalizeTask = (
   task: LegacyTask,
   knownTaskIds: ReadonlySet<string>,
 ): TaskV2 => {
+  const normalizedKind = task.kind ?? 'task'
+  const normalizedStart = task.start
+  const normalizedEnd =
+    normalizedKind === 'milestone' ? normalizedStart : task.end
   const rawDependencies = task.dependsOn ?? []
   const dependencies = dedupeDependencies(
     rawDependencies.filter(
@@ -26,9 +30,9 @@ export const normalizeTask = (
     id: task.id,
     title: task.title,
     laneId: task.laneId,
-    start: task.start,
-    end: task.end,
-    kind: task.kind ?? 'task',
+    start: normalizedStart,
+    end: normalizedEnd,
+    kind: normalizedKind,
     dependsOn: dependencies,
   }
 }

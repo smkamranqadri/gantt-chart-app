@@ -40,7 +40,7 @@ describe('taskModel normalization', () => {
       title: 'Task B',
       laneId: 'frontend',
       start: '2026-02-02',
-      end: '2026-02-04',
+      end: '2026-02-02',
       kind: 'milestone',
       dependsOn: [],
     })
@@ -78,5 +78,32 @@ describe('taskModel normalization', () => {
 
     expect(normalized.dependsOn).toEqual(['task-b'])
     expect(normalized.kind).toBe('task')
+  })
+
+  it('coerces milestone end date to start date while preserving valid dependencies', () => {
+    const milestone: LegacyTask = {
+      id: 'task-c',
+      title: 'Release gate',
+      laneId: 'qa',
+      start: '2026-02-08',
+      end: '2026-02-10',
+      kind: 'milestone',
+      dependsOn: ['task-a', 'missing-id', 'task-a'],
+    }
+
+    const normalized = normalizeTask(
+      milestone,
+      new Set(['task-a', 'task-b', 'task-c']),
+    )
+
+    expect(normalized).toEqual({
+      id: 'task-c',
+      title: 'Release gate',
+      laneId: 'qa',
+      start: '2026-02-08',
+      end: '2026-02-08',
+      kind: 'milestone',
+      dependsOn: ['task-a'],
+    })
   })
 })
