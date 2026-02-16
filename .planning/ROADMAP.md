@@ -123,6 +123,9 @@ Support milestone items as first-class timeline entities with zero-duration cons
 
 ## Phase 5: Interaction Hardening (ID: 5)
 
+- Status: `completed`
+- Completed On: `2026-02-16`
+
 ### Goal
 
 Harden drag/resize/dependency behavior and keyboard flows for reliable desktop-first usage.
