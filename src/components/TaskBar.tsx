@@ -57,10 +57,21 @@ function TaskBar({
     <div
       className={containerClassName}
       style={{ left, width, top }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Edit task ${task.title}`}
+      aria-describedby="task-edit-keyboard-hint"
+      title="Double-click or press Enter to edit"
       onPointerDown={(event) => {
         if (event.detail > 1) return
         event.preventDefault()
         onDragStart(task, event.clientX)
+      }}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        event.stopPropagation()
+        onEditRequest(task.id)
       }}
       onDoubleClick={(event) => {
         event.preventDefault()

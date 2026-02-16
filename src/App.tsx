@@ -403,6 +403,10 @@ function App() {
         </div>
 
         <div className="mt-5 space-y-3">
+          <p id="task-edit-keyboard-hint" className="sr-only">
+            Press Enter or Space on a task to open edit mode. Drag with pointer
+            to move tasks.
+          </p>
           {interactionConflict ? (
             <div
               className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"
