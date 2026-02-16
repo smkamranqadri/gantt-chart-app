@@ -8,7 +8,7 @@ import {
 const createTask = (overrides: Partial<Task> & Pick<Task, 'id'>): Task => ({
   id: overrides.id,
   title: overrides.title ?? overrides.id,
-  laneId: overrides.laneId ?? 'backend',
+  laneId: overrides.laneId ?? 'owais',
   start: overrides.start ?? '2026-02-02',
   end: overrides.end ?? '2026-02-02',
   kind: overrides.kind ?? 'task',
@@ -83,8 +83,8 @@ describe('dependencyAuthoring', () => {
 
   it('allows cross-lane dependency and detects missing targets', () => {
     const tasks: Task[] = [
-      createTask({ id: 'task-a', laneId: 'backend' }),
-      createTask({ id: 'task-b', laneId: 'qa' }),
+      createTask({ id: 'task-a', laneId: 'owais' }),
+      createTask({ id: 'task-b', laneId: 'kamran' }),
     ]
 
     const crossLaneValidation = validateDependencySelection({

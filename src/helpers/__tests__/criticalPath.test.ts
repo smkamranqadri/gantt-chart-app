@@ -5,7 +5,7 @@ import { computeCriticalPath, getTaskDurationDays } from '../criticalPath'
 const createTask = (overrides: Partial<Task> & Pick<Task, 'id'>): Task => ({
   id: overrides.id,
   title: overrides.title ?? overrides.id,
-  laneId: overrides.laneId ?? 'backend',
+  laneId: overrides.laneId ?? 'owais',
   start: overrides.start ?? '2026-02-02',
   end: overrides.end ?? '2026-02-02',
   kind: overrides.kind ?? 'task',

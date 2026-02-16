@@ -129,6 +129,7 @@ function App() {
         if (previous) {
           redoRef.current.push(tasksRef.current.map((task) => ({ ...task })))
           setTasks(previous)
+          setInteractionConflict(null)
           setCanUndo(historyRef.current.length > 0)
           setCanRedo(redoRef.current.length > 0)
         }
@@ -143,6 +144,7 @@ function App() {
         if (next) {
           historyRef.current.push(tasksRef.current.map((task) => ({ ...task })))
           setTasks(next)
+          setInteractionConflict(null)
           setCanUndo(historyRef.current.length > 0)
           setCanRedo(redoRef.current.length > 0)
         }
@@ -165,6 +167,7 @@ function App() {
     if (previous) {
       redoRef.current.push(tasksRef.current.map((task) => ({ ...task })))
       setTasks(previous)
+      setInteractionConflict(null)
       setCanUndo(historyRef.current.length > 0)
       setCanRedo(redoRef.current.length > 0)
     }
@@ -175,6 +178,7 @@ function App() {
     if (next) {
       historyRef.current.push(tasksRef.current.map((task) => ({ ...task })))
       setTasks(next)
+      setInteractionConflict(null)
       setCanUndo(historyRef.current.length > 0)
       setCanRedo(redoRef.current.length > 0)
     }

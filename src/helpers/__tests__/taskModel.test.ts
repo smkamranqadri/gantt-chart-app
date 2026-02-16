@@ -8,7 +8,7 @@ describe('taskModel normalization', () => {
       {
         id: 'task-a',
         title: 'Task A',
-        laneId: 'backend',
+        laneId: 'owais',
         start: '2026-02-02',
         end: '2026-02-03',
         dependsOn: ['task-a', 'task-b', 'unknown', 'task-b'],
@@ -16,7 +16,7 @@ describe('taskModel normalization', () => {
       {
         id: 'task-b',
         title: 'Task B',
-        laneId: 'frontend',
+        laneId: 'zain',
         start: '2026-02-02',
         end: '2026-02-04',
         kind: 'milestone',
@@ -28,7 +28,7 @@ describe('taskModel normalization', () => {
     expect(normalized[0]).toEqual({
       id: 'task-a',
       title: 'Task A',
-      laneId: 'backend',
+      laneId: 'owais',
       start: '2026-02-02',
       end: '2026-02-03',
       kind: 'task',
@@ -38,7 +38,7 @@ describe('taskModel normalization', () => {
     expect(normalized[1]).toEqual({
       id: 'task-b',
       title: 'Task B',
-      laneId: 'frontend',
+      laneId: 'zain',
       start: '2026-02-02',
       end: '2026-02-02',
       kind: 'milestone',
@@ -51,7 +51,7 @@ describe('taskModel normalization', () => {
       {
         id: 'task-a',
         title: 'Task A',
-        laneId: 'backend',
+        laneId: 'owais',
         start: '2026-02-02',
         end: '2026-02-03',
       },
@@ -68,7 +68,7 @@ describe('taskModel normalization', () => {
     const legacyTask: LegacyTask = {
       id: 'task-a',
       title: 'Task A',
-      laneId: 'qa',
+      laneId: 'kamran',
       start: '2026-02-05',
       end: '2026-02-05',
       dependsOn: ['task-b', 'task-z'],
@@ -84,7 +84,7 @@ describe('taskModel normalization', () => {
     const milestone: LegacyTask = {
       id: 'task-c',
       title: 'Release gate',
-      laneId: 'qa',
+      laneId: 'kamran',
       start: '2026-02-08',
       end: '2026-02-10',
       kind: 'milestone',
@@ -99,7 +99,7 @@ describe('taskModel normalization', () => {
     expect(normalized).toEqual({
       id: 'task-c',
       title: 'Release gate',
-      laneId: 'qa',
+      laneId: 'kamran',
       start: '2026-02-08',
       end: '2026-02-08',
       kind: 'milestone',

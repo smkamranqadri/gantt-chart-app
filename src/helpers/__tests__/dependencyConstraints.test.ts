@@ -82,6 +82,33 @@ describe('dependencyConstraints', () => {
     expect(validation.violations).toEqual([])
   })
 
+  it('ignores unrelated violations for the currently changed task', () => {
+    const tasks: Task[] = [
+      createTask({ id: 'task-a', start: '2026-02-02', end: '2026-02-02' }),
+      createTask({ id: 'task-b', start: '2026-02-02', end: '2026-02-02' }),
+      createTask({
+        id: 'task-c',
+        start: '2026-02-02',
+        end: '2026-02-06',
+      }),
+      createTask({
+        id: 'task-d',
+        start: '2026-02-05',
+        end: '2026-02-08',
+        dependsOn: ['task-c'],
+      }),
+    ]
+
+    const validation = validateDependencySchedule({
+      tasks,
+      changedTaskId: 'task-a',
+    })
+
+    expect(validation.isValid).toBe(true)
+    expect(validation.violations).toEqual([])
+    expect(validation.reason).toBeNull()
+  })
+
   it('evaluates milestone dependencies with zero-duration semantics', () => {
     const validTasks: Task[] = [
       createTask({ id: 'task-a', start: '2026-02-02', end: '2026-02-04' }),
