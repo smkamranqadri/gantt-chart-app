@@ -25,6 +25,7 @@ type GanttLaneProps = {
   dependencyLabelById: Map<string, string>
   criticalTaskIdSet: ReadonlySet<string>
   criticalOrderById: ReadonlyMap<string, number>
+  blockedTaskIdSet: ReadonlySet<string>
 }
 
 function GanttLane({
@@ -42,6 +43,7 @@ function GanttLane({
   dependencyLabelById,
   criticalTaskIdSet,
   criticalOrderById,
+  blockedTaskIdSet,
 }: GanttLaneProps) {
   const taskBounds = tasks
     .map((task) => {
@@ -162,6 +164,7 @@ function GanttLane({
                 criticalOrderLabel={
                   typeof criticalOrder === 'number' ? `#${criticalOrder}` : null
                 }
+                isBlockedByConstraint={blockedTaskIdSet.has(task.id)}
               />
             )
           },

@@ -17,6 +17,7 @@ type TaskBarProps = {
   dependencyCount: number
   isCritical: boolean
   criticalOrderLabel: string | null
+  isBlockedByConstraint: boolean
 }
 
 function TaskBar({
@@ -35,8 +36,12 @@ function TaskBar({
   dependencyCount,
   isCritical,
   criticalOrderLabel,
+  isBlockedByConstraint,
 }: TaskBarProps) {
   const isMilestone = task.kind === 'milestone'
+  const blockedClassName = isBlockedByConstraint
+    ? 'ring-2 ring-rose-300 shadow-[0_10px_24px_-10px_rgba(190,18,60,0.6)]'
+    : ''
   const ringClassName = isCritical
     ? 'ring-2 ring-amber-300 shadow-[0_10px_24px_-10px_rgba(180,83,9,0.75)]'
     : 'ring-1 ring-black/5'
@@ -44,7 +49,7 @@ function TaskBar({
     ? `group absolute top-3 h-10 cursor-grab rounded-lg px-0 py-0 text-sm font-semibold transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-700 active:cursor-grabbing ${
         isDragging ? 'opacity-70' : ''
       }`
-    : `group absolute top-3 h-11 cursor-grab rounded-xl px-3 py-2 text-sm font-semibold shadow-[0_10px_20px_-12px_rgba(15,23,42,0.6)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.65)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-700 active:cursor-grabbing ${ringClassName} ${className} ${
+    : `group absolute top-3 h-11 cursor-grab rounded-xl px-3 py-2 text-sm font-semibold shadow-[0_10px_20px_-12px_rgba(15,23,42,0.6)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-16px_rgba(15,23,42,0.65)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-700 active:cursor-grabbing ${ringClassName} ${blockedClassName} ${className} ${
         continuesBefore ? 'rounded-l-sm' : ''
       } ${continuesAfter ? 'rounded-r-sm' : ''} ${isDragging ? 'opacity-70' : ''}`
 
@@ -66,7 +71,7 @@ function TaskBar({
       {isMilestone ? (
         <>
           <span
-            className={`absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-md shadow-sm ${className} ${ringClassName}`}
+            className={`absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-md shadow-sm ${className} ${ringClassName} ${blockedClassName}`}
           />
           <span className="absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap text-[11px] font-semibold text-slate-700">
             {task.title}
@@ -75,6 +80,15 @@ function TaskBar({
       ) : (
         <span className="block truncate">{task.title}</span>
       )}
+      {isBlockedByConstraint ? (
+        <span
+          className={`absolute rounded-full bg-rose-100/95 px-2 py-0.5 text-[10px] font-semibold text-rose-800 ${
+            isMilestone ? '-top-2 left-1/2 -translate-x-1/2' : 'left-2 top-1'
+          }`}
+        >
+          Blocked
+        </span>
+      ) : null}
       {isCritical ? (
         <span
           className={`absolute rounded-full bg-amber-100/95 px-2 py-0.5 text-[10px] font-semibold text-amber-900 ${

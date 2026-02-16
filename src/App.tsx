@@ -10,6 +10,7 @@ import {
   weekStart,
 } from './data/gantt'
 import { computeCriticalPath } from './helpers/criticalPath'
+import { evaluateInteractionCommit } from './helpers/dependencyConstraints'
 import { addDays, daysBetween, formatDate, parseDate } from './helpers/date'
 import { normalizeTasks } from './helpers/taskModel'
 import type { Task } from './types/gantt'
@@ -25,10 +26,20 @@ type DragState = {
   latestClientX: number
   startDate: string
   endDate: string
+  beforeTasks: Task[]
 }
 
 const enforceMilestoneInvariant = (task: Task): Task =>
   task.kind === 'milestone' ? { ...task, end: task.start } : task
+
+const cloneTasks = (snapshot: readonly Task[]): Task[] =>
+  snapshot.map((task) => ({ ...task, dependsOn: [...task.dependsOn] }))
+
+type InteractionConflict = {
+  message: string
+  taskIds: string[]
+  mode: DragMode
+}
 
 const initialTasks = normalizeTasks(seedTasks)
 
@@ -42,6 +53,8 @@ function App() {
   const [weekStartDate, setWeekStartDate] = useState(parseDate(weekStart))
   const [canUndo, setCanUndo] = useState(false)
   const [canRedo, setCanRedo] = useState(false)
+  const [interactionConflict, setInteractionConflict] =
+    useState<InteractionConflict | null>(null)
   const addTaskButtonRef = useRef<HTMLButtonElement>(null)
   const historyRef = useRef<Task[][]>([])
   const redoRef = useRef<Task[][]>([])
@@ -98,6 +111,10 @@ function App() {
   const editingTask = useMemo(
     () => tasks.find((task) => task.id === editingTaskId) ?? null,
     [tasks, editingTaskId],
+  )
+  const blockedTaskIdSet = useMemo(
+    () => new Set(interactionConflict?.taskIds ?? []),
+    [interactionConflict],
   )
 
   useEffect(() => {
@@ -179,6 +196,7 @@ function App() {
   const handleTaskSubmit = (task: Task, mode: TaskModalMode) => {
     const normalizedTask = enforceMilestoneInvariant(task)
     pushHistory(tasksRef.current)
+    setInteractionConflict(null)
     setTasks((prev) =>
       mode === 'create'
         ? [...prev, normalizedTask]
@@ -190,6 +208,7 @@ function App() {
   }
 
   const openCreateTaskModal = () => {
+    setInteractionConflict(null)
     setModalMode('create')
     setEditingTaskId(null)
     setModalSession((prev) => prev + 1)
@@ -197,6 +216,7 @@ function App() {
   }
 
   const openEditTaskModal = (taskId: string) => {
+    setInteractionConflict(null)
     setModalMode('edit')
     setEditingTaskId(taskId)
     setModalSession((prev) => prev + 1)
@@ -245,35 +265,65 @@ function App() {
     }
 
     const handlePointerUp = () => {
+      let nextTasks = cloneTasks(tasksRef.current)
+
       if (dragState.mode === 'resize') {
         const deltaDays = Math.round(
           (dragState.latestClientX - dragState.startClientX) / dayWidth,
         )
 
-        setTasks((prev) =>
-          prev.map((task) => {
-            if (task.id !== dragState.taskId) return task
-            if (task.kind === 'milestone') {
-              return {
-                ...task,
-                end: task.start,
-              }
-            }
-
-            const nextEndDate = addDays(parseDate(dragState.endDate), deltaDays)
-            const startDate = parseDate(dragState.startDate)
-            const safeEnd =
-              nextEndDate.getTime() < startDate.getTime()
-                ? startDate
-                : nextEndDate
-
+        nextTasks = tasksRef.current.map((task) => {
+          if (task.id !== dragState.taskId) return task
+          if (task.kind === 'milestone') {
             return {
               ...task,
-              end: formatDate(safeEnd),
+              end: task.start,
             }
-          }),
-        )
+          }
+
+          const nextEndDate = addDays(parseDate(dragState.endDate), deltaDays)
+          const startDate = parseDate(dragState.startDate)
+          const safeEnd =
+            nextEndDate.getTime() < startDate.getTime() ? startDate : nextEndDate
+
+          return {
+            ...task,
+            end: formatDate(safeEnd),
+          }
+        })
       }
+
+      const interactionDecision = evaluateInteractionCommit({
+        beforeTasks: dragState.beforeTasks,
+        afterTasks: nextTasks,
+        taskId: dragState.taskId,
+        taskLabelById: new Map(
+          nextTasks.map((task) => [task.id, task.title] as const),
+        ),
+      })
+
+      if (!interactionDecision.shouldApply) {
+        setTasks(cloneTasks(dragState.beforeTasks))
+        setInteractionConflict({
+          message:
+            interactionDecision.conflict?.reason ??
+            'This interaction violates a dependency constraint.',
+          taskIds: interactionDecision.conflict?.conflictingTaskIds ?? [
+            dragState.taskId,
+          ],
+          mode: dragState.mode,
+        })
+        setDragState(null)
+        return
+      }
+
+      if (dragState.mode === 'resize') {
+        setTasks(nextTasks)
+      }
+      if (interactionDecision.shouldRecordHistory) {
+        pushHistory(dragState.beforeTasks)
+      }
+      setInteractionConflict(null)
       setDragState(null)
     }
 
@@ -353,6 +403,15 @@ function App() {
         </div>
 
         <div className="mt-5 space-y-3">
+          {interactionConflict ? (
+            <div
+              className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"
+              role="alert"
+              aria-live="assertive"
+            >
+              Blocked {interactionConflict.mode}: {interactionConflict.message}
+            </div>
+          ) : null}
           {criticalPathComputation.warning ? (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               Critical path unavailable: {criticalPathComputation.warning}
@@ -398,7 +457,7 @@ function App() {
                     onDragStart={(task, clientX) => {
                       const current = taskIndexMap.get(task.id)
                       if (!current) return
-                      pushHistory(tasks)
+                      setInteractionConflict(null)
                       setDragState({
                         taskId: task.id,
                         mode: 'move',
@@ -408,13 +467,14 @@ function App() {
                         latestClientX: clientX,
                         startDate: task.start,
                         endDate: task.end,
+                        beforeTasks: cloneTasks(tasks),
                       })
                     }}
                     onResizeStart={(task, clientX) => {
                       if (task.kind === 'milestone') return
                       const current = taskIndexMap.get(task.id)
                       if (!current) return
-                      pushHistory(tasks)
+                      setInteractionConflict(null)
                       setDragState({
                         taskId: task.id,
                         mode: 'resize',
@@ -424,11 +484,13 @@ function App() {
                         latestClientX: clientX,
                         startDate: task.start,
                         endDate: task.end,
+                        beforeTasks: cloneTasks(tasks),
                       })
                     }}
                     onEditRequest={openEditTaskModal}
                     criticalTaskIdSet={criticalTaskIdSet}
                     criticalOrderById={criticalOrderById}
+                    blockedTaskIdSet={blockedTaskIdSet}
                   />
                 ))}
               </div>
